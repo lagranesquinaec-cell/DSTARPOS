@@ -312,6 +312,68 @@ body.m .tkwrap{grid-template-columns:1fr!important}
 :root[data-fx=space] .panel,:root[data-fx=space] .dlg,:root[data-fx=space] .tile-s,:root[data-fx=space] .pc2{background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(6px)}
 :root[data-fx=space] .brand::before{content:'🚀 '}:root[data-fx=space] .brand::after{content:' 🪐'}
 .tsec{margin:16px 0 8px;font:600 13px var(--font-head);color:var(--muted)}
+/* ---- precios por producto ---- */
+.ptab{display:grid;gap:6px}
+.pt-r{display:grid;grid-template-columns:1fr minmax(96px,128px) 44px;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r1);background:var(--surface2)}
+.pt-4{border-style:dashed;background:var(--warn-bg)}
+.pt-t{display:flex;flex-direction:column;min-width:0}.pt-t b{font-size:14px}.pt-t small{color:var(--muted);font-size:12px}
+.pt-i{display:flex;align-items:center;gap:4px}.pt-i span{font-weight:700;color:var(--muted)}.pt-i input{text-align:right}
+.pt-m{font-size:12px;font-weight:700;color:var(--ok);text-align:right}.pt-m.neg{color:var(--bad)}
+/* ---- Liquid Glass (iOS) ---- */
+:root[data-fx=glass]{--font-body:-apple-system,'SF Pro Text',system-ui,'Segoe UI',Roboto,sans-serif;--font-head:-apple-system,'SF Pro Display',system-ui,sans-serif}
+:root[data-fx=glass] body{background:radial-gradient(60vmax 50vmax at 10% 0,#7CC4FF 0,transparent 60%),radial-gradient(55vmax 45vmax at 95% 10%,#C9A7FF 0,transparent 60%),radial-gradient(60vmax 50vmax at 70% 100%,#FFB3D1 0,transparent 60%),radial-gradient(50vmax 40vmax at 0 100%,#8FF0D0 0,transparent 60%),#DCE8FA;background-attachment:fixed}
+:root[data-theme=dark][data-fx=glass] body{background:radial-gradient(60vmax 50vmax at 10% 0,#1D4E89 0,transparent 60%),radial-gradient(55vmax 45vmax at 95% 10%,#5B3A9E 0,transparent 60%),radial-gradient(60vmax 50vmax at 70% 100%,#8A2B5E 0,transparent 60%),#0A0F1C;background-attachment:fixed}
+:root[data-fx=glass] body::before{background:transparent}
+:root[data-fx=glass] .top,:root[data-fx=glass] .panel,:root[data-fx=glass] .dlg,:root[data-fx=glass] .tile-s,:root[data-fx=glass] .pc2,:root[data-fx=glass] .tblw,:root[data-fx=glass] .seg,:root[data-fx=glass] .tcard,:root[data-fx=glass] .pt-r{background:color-mix(in srgb,var(--surface) 46%,transparent)!important;-webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);border:1px solid rgba(255,255,255,.55)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),inset 0 -1px 0 rgba(255,255,255,.15),0 10px 30px -12px rgba(30,50,110,.35)!important}
+:root[data-fx=glass] .top{border-radius:0 0 26px 26px;border-top:0!important}
+:root[data-fx=glass] .btn,:root[data-fx=glass] input,:root[data-fx=glass] select,:root[data-fx=glass] textarea{background:color-mix(in srgb,var(--surface) 55%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+:root[data-fx=glass] .btn{border-radius:99px;padding-inline:18px}
+:root[data-fx=glass] .btn.pri{background:linear-gradient(180deg,#4DA3FF,#0A84FF);color:#fff;border-color:rgba(255,255,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 6px 16px -6px #0A84FF}
+:root[data-fx=glass] input,:root[data-fx=glass] select,:root[data-fx=glass] textarea{border-radius:14px}
+:root[data-fx=glass] nav a{border-radius:99px;border-bottom:0;margin:2px}
+:root[data-fx=glass] nav a.on{background:color-mix(in srgb,var(--surface) 70%,transparent);box-shadow:inset 0 1px 0 #fff,0 4px 12px -6px rgba(0,0,0,.3)}
+:root[data-fx=glass] .chip{background:color-mix(in srgb,var(--surface) 55%,transparent)}
+:root[data-fx=glass] .chip.ok{background:var(--ok-bg)}:root[data-fx=glass] .chip.warn{background:var(--warn-bg)}:root[data-fx=glass] .chip.bad{background:var(--bad-bg)}
+:root[data-fx=glass] .tblw table,:root[data-fx=glass] th{background:transparent!important}
+/* ---- Windows XP (Luna) ---- */
+:root[data-fx=xp]{--font-body:Tahoma,'Segoe UI',Verdana,sans-serif;--font-head:Trebuchet MS,Tahoma,sans-serif;--line:#919B9C}
+:root[data-fx=xp] body{font-size:13px;background:linear-gradient(180deg,#3A78E0 0,#7FB0F5 52%,#5DB04A 53%,#3C8A2A 100%);background-attachment:fixed}
+:root[data-fx=xp] body::before{background:#0A5FE0}
+:root[data-fx=xp] .top{background:linear-gradient(180deg,#0A5FE0 0,#2A70E8 8%,#3D95FF 40%,#0058EE 88%,#0035C8 100%)!important;border-bottom:1px solid #003CA0;border-radius:8px 8px 0 0;color:#fff;box-shadow:none}
+:root[data-fx=xp] .top .brand{color:#fff;text-shadow:1px 1px 0 #0A246A;font-style:italic}
+:root[data-fx=xp] .top nav{background:#ECE9D8;margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:4px 8px 0}
+:root[data-fx=xp] nav a{color:#000;border:1px solid transparent;border-radius:3px 3px 0 0;padding:6px 12px;font-weight:400}
+:root[data-fx=xp] nav a.on{background:#fff;border:1px solid #919B9C;border-top:3px solid #FFC83C;border-bottom-color:#fff;font-weight:700;margin-bottom:-1px}
+:root[data-fx=xp] #view{background:#ECE9D8;border:3px solid #0A4FD0;border-top:0;padding:12px;border-radius:0 0 8px 8px;margin-top:-16px;padding-top:28px}
+:root[data-fx=xp] .btn{background:linear-gradient(180deg,#fff 0,#F0EFE8 85%,#D6D0C0 100%);border:1px solid #003C74;border-radius:3px;box-shadow:none;color:#000;font-weight:400;min-height:28px;padding:3px 12px}
+:root[data-fx=xp] .btn:hover{box-shadow:inset 0 0 0 2px #F8B330}
+:root[data-fx=xp] .btn:active{background:#E3DFCF}
+:root[data-fx=xp] .btn.pri{background:linear-gradient(180deg,#7FD16B 0,#3FA52E 50%,#2E8A20 100%);color:#fff;font-weight:700;text-shadow:0 1px 0 #1C5A12;border-color:#1C5A12}
+:root[data-fx=xp] .btn.bad{color:#B00000}
+:root[data-fx=xp] input,:root[data-fx=xp] select,:root[data-fx=xp] textarea{border:1px solid #7F9DB9;border-radius:0;min-height:26px;padding:3px 5px;background:#fff}
+:root[data-fx=xp] .panel,:root[data-fx=xp] .tile-s,:root[data-fx=xp] .pc2,:root[data-fx=xp] .tblw,:root[data-fx=xp] .pt-r{background:#fff;border:1px solid #919B9C;border-radius:0;box-shadow:none}
+:root[data-fx=xp] .dlg{background:#ECE9D8;border:3px solid #0A4FD0;border-radius:8px 8px 0 0;box-shadow:4px 4px 12px rgba(0,0,0,.45);padding:0 12px 12px}
+:root[data-fx=xp] .dlg>:first-child{margin:0 -12px;padding:6px 10px;background:linear-gradient(180deg,#0A5FE0,#3D95FF 40%,#0058EE);color:#fff;text-shadow:1px 1px 0 #0A246A;font-weight:700}
+:root[data-fx=xp] h2{font-size:16px;color:#0A2E7A}
+:root[data-fx=xp] .chip{border-radius:2px;border:1px solid #919B9C;background:#F7F6F0}
+:root[data-fx=xp] th{background:linear-gradient(#fff,#ECE9D8);border-bottom:1px solid #919B9C}
+/* ---- Instagram ---- */
+:root[data-fx=insta]{--font-body:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;--font-head:'Billabong','Segoe Script','Brush Script MT',cursive,-apple-system,sans-serif;--line:#DBDBDB;--muted:#737373}
+:root[data-fx=insta] body{background:var(--bg)}
+:root[data-fx=insta] .top{box-shadow:none;border-bottom:1px solid var(--line)}
+:root[data-fx=insta] .brand{font-family:var(--font-head);font-size:26px;font-weight:400;background:linear-gradient(45deg,#F09433,#E6683C 25%,#DC2743 50%,#CC2366 75%,#BC1888);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-fx=insta] .brand i{display:none}
+:root[data-fx=insta] #logo{border-radius:50%;padding:2px;background:linear-gradient(45deg,#F09433,#DC2743,#BC1888);box-sizing:content-box;border:2px solid var(--surface)}
+:root[data-fx=insta] nav a{border-bottom:0;border-top:2px solid transparent;font-weight:600;font-size:13px;color:var(--muted)}
+:root[data-fx=insta] nav a.on{color:var(--fg);border-top-color:var(--fg)}
+:root[data-fx=insta] .panel,:root[data-fx=insta] .tile-s,:root[data-fx=insta] .pc2,:root[data-fx=insta] .tblw,:root[data-fx=insta] .dlg,:root[data-fx=insta] .pt-r{box-shadow:none;border:1px solid var(--line);border-radius:8px}
+:root[data-fx=insta] .dlg{border-radius:14px}
+:root[data-fx=insta] .btn{border-radius:8px;font-weight:600;box-shadow:none}
+:root[data-fx=insta] .btn.pri{background:#0095F6;border-color:#0095F6;color:#fff}.btn.pri:hover{filter:brightness(.95)}
+:root[data-fx=insta] input,:root[data-fx=insta] select,:root[data-fx=insta] textarea{background:#FAFAFA;border:1px solid #DBDBDB;border-radius:6px}
+:root[data-theme=dark][data-fx=insta] input,:root[data-theme=dark][data-fx=insta] select,:root[data-theme=dark][data-fx=insta] textarea{background:#121212;border-color:#363636}
+:root[data-fx=insta] h2{font-weight:700;font-size:18px}:root[data-fx=insta] h2,:root[data-fx=insta] h3{font-family:var(--font-body)}
+:root[data-fx=insta] .chip.warn{background:linear-gradient(45deg,#F09433,#DC2743,#BC1888);color:#fff}
 </style>
 
 <div class="wrap">
@@ -397,6 +459,9 @@ const THEMES=[
  {id:'kawaii',n:'Kawaii',d:'🍓 Nubes, estrellas y corazones',fx:'cute',bg:'#FFF0F7',surface:'#FFFFFF',fg:'#5B3A5E',accent:'#FF7EB6',r:26},
  {id:'gatita',n:'Gatita',d:'🐱 Patitas, gatitos y lazos',fx:'bow',bg:'#FFE9F1',surface:'#FFFDFE',fg:'#6B2740',accent:'#E8336D',r:22},
  {id:'gamer',n:'Gamer RGB',d:'🎮 HUD, scanlines y neón',fx:'gamer',bg:'#07060d',surface:'#110f1f',fg:'#EDE9FF',accent:'#8B5CF6',r:8,dark:1},
+ {id:'glass',n:'Liquid Glass',d:'🫧 Vidrio líquido tipo iOS',fx:'glass',bg:'#D8E4F8',surface:'#FFFFFF',fg:'#0F1A2E',accent:'#0A84FF',r:24},
+ {id:'xp',n:'Windows XP',d:'🪟 Clásico Luna azul y beige',fx:'xp',bg:'#ECE9D8',surface:'#FFFFFF',fg:'#000000',accent:'#245EDC',r:3},
+ {id:'insta',n:'Instagram',d:'📸 Limpio con degradado',fx:'insta',bg:'#FAFAFA',surface:'#FFFFFF',fg:'#262626',accent:'#0095F6',r:10},
  {id:'galaxia',n:'Galaxia',d:'🚀 Espacio con estrellitas',fx:'space',bg:'#0a0b1e',surface:'#14163a',fg:'#E8ECFF',accent:'#6EE7F9',r:16,dark:1}
 ];
 const CUSTOM_DEF={bg:'#F5F4FA',surface:'#FFFFFF',fg:'#1C1933',accent:'#5557AE'};
@@ -458,8 +523,10 @@ function rucOk(r){if(!/^\d{13}$/.test(r))return false;const p=+r.slice(0,2);if(!
   return false}
 const TIPOS={cedula:'Cédula',ruc:'RUC',pasaporte:'Pasaporte',cf:'Consumidor final'};
 function identErr(tipo,id){id=String(id||'').trim();if(tipo==='cf')return '';if(!id)return 'Ingrese la identificación.';
-  if(tipo==='cedula'&&!cedulaOk(id))return 'La cédula no es válida (10 dígitos).';
-  if(tipo==='ruc'&&!rucOk(id))return 'El RUC no es válido (13 dígitos).';return ''}
+  if(tipo==='cedula'&&!/^\d{10}$/.test(id))return 'La cédula debe tener 10 dígitos.';
+  if(tipo==='ruc'&&!/^\d{13}$/.test(id))return 'El RUC debe tener 13 dígitos.';return ''}
+const cleanId=v=>String(v||'').replace(/[\s.\-]/g,'');
+function identWarn(tipo,id){return (tipo==='cedula'&&!cedulaOk(id))||(tipo==='ruc'&&!rucOk(id))?'Dígito verificador no coincide (revise)':''}
 
 /* ===================== ui base ===================== */
 let view='venta';
@@ -656,18 +723,18 @@ function custView(){const c=S.cart;if(c.customerId==='cf')return {...emptyCust()
 function renderCust(){
   const el=$('#custPanel');if(!el)return;const v=custView(),dis=v.kind==='cf'?'disabled':'';let st;
   if(v.kind==='cf')st='<span class="chip">Consumidor final</span>';else if(v.kind==='saved')st='<span class="chip ok">Cliente guardado</span>'+(v.merch?' <span class="chip warn">⭐ Aliado</span>':'');
-  else{const e=identErr(guessTipo(v.ident),v.ident);st=e?`<span class="chip bad">${esc(e)}</span>`:'<span class="chip warn">Cliente nuevo</span>'}
+  else{const tp=guessTipo(v.ident),e=identErr(tp,v.ident),w=identWarn(tp,v.ident);st=e?`<span class="chip bad">${esc(e)}</span>`:w?`<span class="chip warn">Cliente nuevo · ${w}</span>`:'<span class="chip warn">Cliente nuevo</span>'}
   const F=(f,l,cls,type)=>`<label class="f ${cls||''}">${l}<input id="cu_${f}" ${type?`type="${type}"`:''} value="${esc(v[f])}" data-chg="custField" data-f="${f}" ${dis} autocomplete="off"></label>`;
   el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><h3>Cliente</h3>${st}</div>
    <div class="cgrid"><label class="f s2">Cédula o RUC<input id="cu_ident" value="${esc(v.ident)}" data-chg="custIdent" inputmode="numeric" placeholder="Vacío = consumidor final" autocomplete="off"></label>
    ${F('name','Nombres / razón social','s2')}${F('tel','Teléfono')}${F('email','Correo','','email')}${F('addr','Dirección','s2')}</div>
-   <div class="ft" style="margin-top:10px;justify-content:flex-start">${v.kind==='new'?'<button class="btn sm pri" data-act="saveNewCust">Guardar cliente</button>':''}<button class="btn sm" data-act="pickCustomer">Buscar cliente</button><button class="btn sm" data-act="newCust" data-from="venta">＋ Nuevo cliente</button>${v.kind!=='cf'?'<button class="btn sm" data-act="custClear">Consumidor final</button>':''}</div>`}
+   ${v.kind!=='cf'?`<label class="ck" style="margin-top:8px"><input type="checkbox" data-chg="custMerch" ${v.merch?'checked':''}> ⭐ Cliente aliado (paga el precio más bajo)</label>`:''}<div class="ft" style="margin-top:10px;justify-content:flex-start">${v.kind==='new'?'<button class="btn sm pri" data-act="saveNewCust">Guardar cliente</button>':''}<button class="btn sm" data-act="pickCustomer">Buscar cliente</button><button class="btn sm" data-act="newCust" data-from="venta">＋ Nuevo cliente</button>${v.kind!=='cf'?'<button class="btn sm" data-act="custClear">Consumidor final</button>':''}</div>`}
 function saveNewCust(){
   const c=S.cart,d=c.cust,tipo=guessTipo(d.ident),e=identErr(tipo,d.ident);
   if(e){toast(e,1);const i=$('#cu_ident');i&&i.focus();return false}
   if(!String(d.name).trim()){toast('Ingrese el nombre del cliente.',1);const i=$('#cu_name');i&&i.focus();return false}
   const dup=S.customers.find(x=>x.ident===d.ident);if(dup){c.customerId=dup.id;c.cust=emptyCust();renderCust();return true}
-  const id='c'+uid();S.customers.push({id,tipo,ident:d.ident,name:String(d.name).trim().toUpperCase(),tel:d.tel||'',email:d.email||'',addr:d.addr||''});
+  const id='c'+uid();S.customers.push({id,tipo,ident:d.ident,name:String(d.name).trim().toUpperCase(),tel:d.tel||'',email:d.email||'',addr:d.addr||'',merch:!!d.merch});
   c.customerId=id;c.cust=emptyCust();save(true);renderCust();toast('Cliente guardado.');return true}
 
 /* ---- cobro ---- */
@@ -913,18 +980,21 @@ function prodList(){
     <div class="pc2-pr">${chips}</div><div class="pc2-ft"><span>Costo <b>${money(p.cost)}</b></span>${m==null?'':`<span class="pill ${m<0?'bad':m<25?'warn':'ok'}">Margen ${m.toFixed(0)}%</span>`}${p.iva?`<span class="pill">IVA ${S.cfg.ivaRate}%</span>`:''}${p.active?'':'<span class="pill bad">inactivo</span>'}</div></div>`}).join('');
   $('#pbody').innerHTML=`<div class="muted small" style="margin-bottom:8px">${L.length} de ${S.products.length-(prod('p_libre')?1:0)} productos${L.length>200?' · se muestran 200, afine la búsqueda':''}</div><div class="pgrid">${rows||empty('Sin resultados.')}</div>`}
 function tierLabel(i){const n=S.cfg.listNames[i];return i===1?`${n} (desde ${S.cfg.t2} u.)`:i===2?`${n} (desde ${S.cfg.t3} u.)`:i===3?`${n} (por bulto)`:i===4?`${n} (comerciantes, solo si se elige)`:n}
+const tierWhen=i=>i===0?'Desde 1 unidad':i===1?`Desde ${S.cfg.t2} unidades`:i===2?`Desde ${S.cfg.t3} unidades`:i===3?'Al llevar 1 bulto completo':'⭐ Solo clientes aliados';
 function editProd(id){
   const p=id?prod(id):{id:'',code:'',name:'',line:'INVENTARIO',cost:0,p:[0,0,0,0,0],iva:false,track:false,stock:0,min:0,active:true,bulto:0,boxCode:'',supplier:''};
   modal(`${dlgHead(id?'Editar producto':'Nuevo producto')}<div class="fgrid">
    <label class="f">Código de barras / interno<input id="e_code" value="${esc(p.code)}" ${id?'':'autofocus'}></label><label class="f" style="grid-column:span 2">Descripción<input id="e_name" value="${esc(p.name)}"></label>
    <label class="f">Línea<input id="e_line" value="${esc(p.line)}"></label><label class="f">Costo<input id="e_cost" type="number" step="0.01" min="0" value="${p.cost}" data-inp="margin"></label></div>
-   <div><div style="font-weight:700;margin-bottom:6px">Precios de venta</div><div class="fgrid">${[0,1,2,3,4].map(i=>`<label class="f">${esc(tierLabel(i))}<input id="e_p${i}" type="number" step="0.01" min="0" value="${p.p[i]||0}" data-inp="margin"></label>`).join('')}<label class="f">Unidades por bulto<input id="e_bulto" type="number" step="1" min="0" value="${p.bulto||0}" placeholder="0 = sin bulto"></label><label class="f" style="grid-column:1/-1">Código de barras de la caja (opcional)<input id="e_box" value="${esc(p.boxCode||'')}" placeholder="Solo si la caja trae un código distinto al de la unidad"></label></div>
-   <div class="muted small" style="margin-top:6px">Si escanea el código de la caja, se agregan de una vez las unidades por bulto (24, 12, etc.; cada producto tiene su cantidad) y se descuentan del stock.</div><div class="muted small" style="margin-top:6px">Al vender, el precio cambia solo según la cantidad. Deje en 0 los precios que no use.</div><div id="mg" class="muted small" style="margin-top:4px"></div><details class="ptools" ontoggle="if(this.open&&!$('#pc_u').value)pcFill()"><summary>🧮 Calculadora de precios (cuánto quiero ganar)</summary>${pcalcHTML()}</details></div>
+   <div><div style="font-weight:700">Precios de venta</div><div class="muted small" style="margin:2px 0 8px">El sistema elige solo el precio según las unidades que lleve el cliente. Deje en 0 los que no use.</div>
+   <div class="ptab">${[0,1,2,3,4].map(i=>`<div class="pt-r pt-${i}"><div class="pt-t"><b>${esc(S.cfg.listNames[i])}</b><small>${tierWhen(i)}</small></div><div class="pt-i"><span>$</span><input id="e_p${i}" type="number" step="0.01" min="0" value="${p.p[i]||0}" data-inp="margin" aria-label="${esc(S.cfg.listNames[i])}"></div><div class="pt-m" id="m_p${i}"></div></div>`).join('')}</div>
+   <div class="fgrid" style="margin-top:10px"><label class="f">Unidades por bulto / caja<input id="e_bulto" type="number" step="1" min="0" value="${p.bulto||0}" placeholder="0 = sin bulto"></label><label class="f" style="grid-column:span 2">Código de barras de la caja (opcional)<input id="e_box" value="${esc(p.boxCode||'')}" placeholder="Solo si la caja trae un código distinto"></label></div>
+   <div class="muted small" style="margin-top:6px">Al escanear el código de la caja se agregan las unidades por bulto y se descuentan del stock. El precio ⭐ Aliado se aplica solo a clientes aliados y nunca es mayor que el más bajo de los otros.</div><div id="mg" class="muted small" style="margin-top:4px"></div><details class="ptools" ontoggle="if(this.open&&!$('#pc_u').value)pcFill()"><summary>🧮 Calculadora de precios (cuánto quiero ganar)</summary>${pcalcHTML()}</details></div>
    <div><label class="f">Proveedor (opcional)<select id="e_sup">${supOpts(p.supplier)}</select></label><div style="display:flex;gap:6px;margin-top:6px"><input id="e_newsup" placeholder="Agregar proveedor nuevo" style="min-height:34px"><button class="btn sm" data-act="addSupInline" style="white-space:nowrap">Agregar</button></div></div>
    <div style="display:grid;gap:8px"><label class="ck"><input type="checkbox" id="e_iva" ${p.iva?'checked':''}> Cobra IVA ${S.cfg.ivaRate}% <span class="muted small">(opcional; en RIMPE déjelo sin marcar)</span></label><label class="ck"><input type="checkbox" id="e_active" ${p.active?'checked':''}> Disponible para la venta</label><label class="ck"><input type="checkbox" id="e_track" ${p.track?'checked':''}> Controlar inventario</label></div>
    <div class="fgrid"><label class="f">${id?'Stock actual (use Inventario para ajustar)':'Stock inicial'}<input id="e_stock" type="number" step="1" value="${p.stock}" ${id?'disabled':''}></label><label class="f">Stock mínimo (alerta)<input id="e_min" type="number" step="1" min="0" value="${p.min||0}"></label></div>
    <div class="ft">${id?`<button class="btn bad" data-act="delProd" data-id="${id}">Eliminar</button>`:''}<button class="btn" data-act="closeModal">Cancelar</button><button class="btn pri" data-act="saveProd" data-id="${id}">Guardar</button></div>`,1);margin()}
-function margin(){const c=num($('#e_cost').value),p=num($('#e_p0').value),el=$('#mg');if(!el)return;el.textContent=p>0?`Margen en precio unidad: ${((p-c)/p*100).toFixed(1)}% · ganancia ${money(p-c)} por unidad`:'Sin precio de venta.'}
+function margin(){const c=num($('#e_cost').value);for(let i=0;i<5;i++){const q=num(($('#e_p'+i)||{}).value),m=$('#m_p'+i);if(m)m.textContent=q>0&&c>0?((q-c)/q*100).toFixed(0)+'%':'';if(m)m.className='pt-m'+(q>0&&q<=c?' neg':'')}const p=num($('#e_p0').value),el=$('#mg');if(!el)return;el.textContent=p>0?`Margen en precio unidad: ${((p-c)/p*100).toFixed(1)}% · ganancia ${money(p-c)} por unidad`:'Sin precio de venta.'}
 function saveProd(id){
   const code=$('#e_code').value.trim(),name=$('#e_name').value.trim().toUpperCase();if(!code||!name)return toast('Código y descripción son obligatorios.',1);
   if(S.products.some(p=>p.code.toLowerCase()===code.toLowerCase()&&p.id!==id))return toast('Ya existe un producto con ese código.',1);
@@ -1036,7 +1106,7 @@ function custModal(id,from){
   <label class="f">Nombres / razón social<input id="c_name" value="${esc(c.name)}"></label><div class="fgrid"><label class="f">Teléfono<input id="c_tel" value="${esc(c.tel)}"></label><label class="f">Correo (para enviar la factura)<input id="c_email" type="email" value="${esc(c.email)}"></label></div><label class="f">Dirección<input id="c_addr" value="${esc(c.addr)}"></label><label class="ck"><input type="checkbox" id="c_merch" ${c.merch?'checked':''}> ⭐ Aliado / comerciante antiguo (se le cobra el precio más bajo registrado de cada producto, nunca $0)</label>
   <div class="ft">${id?`<button class="btn bad" data-act="delCust" data-id="${id}">Eliminar</button>`:''}<button class="btn" data-act="closeModal">Cancelar</button><button class="btn pri" data-act="saveCust" data-id="${id||''}" data-from="${from||''}">Guardar</button></div>`)}
 function saveCust(id,from){
-  const tipo=$('#c_tipo').value,ident=$('#c_ident').value.trim(),name=$('#c_name').value.trim().toUpperCase();const e=identErr(tipo,ident);if(e)return toast(e,1);if(!name)return toast('Ingrese el nombre del cliente.',1);
+  const tipo=$('#c_tipo').value,ident=cleanId($('#c_ident').value),name=$('#c_name').value.trim().toUpperCase();const e=identErr(tipo,ident);if(e)return toast(e,1);if(!name)return toast('Ingrese el nombre del cliente.',1);
   if(S.customers.some(c=>c.ident===ident&&c.id!==id))return toast('Ya existe un cliente con esa identificación.',1);
   const d={tipo,ident,name,merch:$('#c_merch').checked,tel:$('#c_tel').value.trim(),email:$('#c_email').value.trim(),addr:$('#c_addr').value.trim()};let cid=id;
   if(id)Object.assign(cust(id),d);else{cid='c'+uid();S.customers.push({id:cid,...d})}
@@ -1211,9 +1281,10 @@ const A={
 function heldModal(){modal(`${dlgHead('Ventas en espera')}${S.held.map(h=>`<div class="payrow" style="grid-template-columns:1fr auto auto"><span>${fmtDT(h.ts)} · ${h.cart.lines.length} ítems · <b>${money(h.total)}</b></span><button class="btn sm pri" data-act="recover" data-id="${h.id}">Recuperar</button><button class="btn sm bad" data-act="dropHeld" data-id="${h.id}">Quitar</button></div>`).join('')||empty('No hay ventas en espera.')}`)}
 const CH={
   setList(el){S.cart.list=+el.value;S.cart.listAuto=false;for(const l of S.cart.lines)reprice(l);renderCart();save()},
-  custIdent(el){const v=el.value.trim(),c=S.cart;
+  custIdent(el){const v=cleanId(el.value),c=S.cart;
     if(!v){c.customerId='cf';c.cust=emptyCust()}else{const f=S.customers.find(x=>x.ident===v&&x.id!=='cf');if(f){c.customerId=f.id;c.cust=emptyCust();applyMerch(f)}else{c.customerId='new';c.cust={...emptyCust(),ident:v}}}
     save();renderCust();const t=c.customerId==='new'?$('#cu_name'):$('#q');t&&t.focus()},
+  custMerch(el){const c=S.cart;if(c.customerId==='new'){c.cust.merch=el.checked;applyMerch({merch:el.checked})}else if(c.customerId!=='cf'){const k=cust(c.customerId);k.merch=el.checked;applyMerch(k);save(true)}renderCust();save()},
   custField(el){const f=el.dataset.f,v=el.value.trim(),c=S.cart;if(c.customerId==='new')c.cust[f]=v;else if(c.customerId!=='cf'){cust(c.customerId)[f]=f==='name'?v.toUpperCase():v}save()},
   lineQty(el){const l=S.cart.lines[+el.dataset.i],v=Math.max(0,num(el.value)),p=prod(l.pid);if(p.track&&!S.cfg.allowNeg&&v>p.stock){toast(`Stock insuficiente (hay ${p.stock}).`,1);renderCart();return}if(v===0)S.cart.lines.splice(+el.dataset.i,1);else{l.qty=v;reprice(l)}renderCart();save()},
   linePrice(el){const l=S.cart.lines[+el.dataset.i];l.price=Math.max(0,num(el.value));l.manual=true;renderCart();save()},
@@ -1379,7 +1450,7 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.cust){const c=S.cfg;c.custom=Object.assign({},CUSTOM_DEF,c.custom,{[el.dataset.cust]:el.value});if(c.theme!=='custom'){c.theme='custom';$$('.tcard').forEach(b=>b.classList.remove('on'));const t=$('#tc_custom');t&&t.classList.add('on')}
     applyTheme();const t=$('#tc_custom .sw');if(t){const q=c.custom;t.innerHTML=[q.bg,q.surface,q.accent,q.fg].map(x=>`<i style="background:${x}"></i>`).join('')}save();return}if(el.dataset.inp&&IN[el.dataset.inp])IN[el.dataset.inp](el);
   if(el.id==='pu_q')puRender();
-  if(el.id==='e_p0'||el.id==='e_cost')margin()});
+  if(/^e_p\d$/.test(el.id)||el.id==='e_cost')margin()});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&!$('#modal').hidden){closeModal();return}
   const t=e.target;
