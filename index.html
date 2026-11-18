@@ -655,6 +655,42 @@ body.m .top{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain}
 :root[data-fx=nft] #custPanel .chip{background:rgba(43,36,56,.14);color:#2B2438}
 :root[data-fx=nft] td input,:root[data-fx=fit] td input,:root[data-fx=coin] td input{padding-inline:6px;text-align:center}
 :root[data-fx=brut] td input{padding-inline:6px;text-align:center}
+
+/* ---- Venta PC: todo en una sola pantalla, sin deslizar la página ---- */
+body.pc .pc{display:flex;flex-direction:column;gap:8px;height:calc(100dvh - var(--topH,120px) - 56px);min-height:440px}
+body.pc .pc>*{flex:none;min-width:0}
+/* cliente en una sola fila */
+body.pc .pc #custPanel{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;padding:8px 12px}
+body.pc .pc #custPanel>div:first-child{grid-column:1;margin:0!important;gap:10px!important}
+body.pc .pc #custPanel>label.ck{grid-column:2;margin:0!important}
+body.pc .pc #custPanel>.ft{grid-column:3;grid-row:1;margin:0!important;justify-content:flex-end!important;flex-wrap:nowrap}
+body.pc .pc #custPanel>.cgrid{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+body.pc .pc #custPanel .cgrid input{min-height:32px;padding:4px 8px}
+body.pc .pc #custPanel .cgrid .s2{grid-column:span 2}
+/* fila vendedor / fecha / lista */
+body.pc .pc .pc-row{padding:6px 12px;gap:12px;grid-template-columns:200px auto 1fr 230px 190px;align-items:center}
+body.pc .pc .pc-row b{white-space:nowrap}
+body.pc .pc .pc-row .btn,body.pc .pc .pc-row select,body.pc .pc .pc-row input{min-height:34px}
+body.pc .pc .pc-row span.l{margin-bottom:0;font-size:10px}
+body.pc .pc .sbar{margin:0!important}
+/* sugerencias: lista flotante, no empuja el resto */
+body.pc .pc #sugg{position:relative;height:0;margin-top:-8px;z-index:30}
+body.pc .pc #sugg>.plist{position:absolute;left:0;right:0;top:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 30px rgba(0,0,0,.28);overflow:hidden}
+body.pc .pc #sugg>.muted{position:absolute;left:0;top:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px!important}
+body.pc .pc #sugg>.btn{position:absolute;left:0;top:38px}
+/* carrito: ocupa el espacio que sobra y desplaza solo por dentro */
+body.pc .pc .cartw{flex:1 1 0;min-height:110px!important;overflow:auto}
+body.pc .pc .cartw .empty{padding:24px 16px!important}
+body.pc .pc .ct2 td,body.pc .pc .ct2 th{padding:5px 10px}
+/* pie: botones + totales compactos */
+body.pc .pc .pc-foot{align-items:stretch;grid-template-columns:minmax(0,1fr) minmax(480px,640px);gap:10px}
+body.pc .pc .pc-btns{padding:8px 12px;gap:8px;align-content:center}
+body.pc .pc .pc-btns .btn{min-height:40px}
+body.pc .pc .pc-tot{padding:8px 12px;display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:12px;align-items:center}
+body.pc .pc .pc-tot .tot{font-size:13px;gap:1px 10px}
+body.pc .pc .pc-tot .big{font-size:30px;margin-top:3px;padding-top:4px}
+body.pc .pc .pc-pay{flex-direction:column;align-items:stretch;margin:0;gap:8px}
+body.pc .pc .pc-pay .pri{flex:none;width:100%;min-height:48px;font-size:18px;margin:0}
 </style>
 
 
@@ -939,7 +975,9 @@ function vVentaPC(){
    <section id="cartw" class="cartw tblw"></section>
    <div class="pc-foot"><div class="panel pc-btns"><button class="btn" data-act="search">Buscar producto</button><button class="btn" data-act="hold">En espera</button><button class="btn" data-act="lastTicket">Re-imprimir último ticket</button><button class="btn bad" data-act="clearCart">Cancelar venta</button></div>
     <div class="panel pc-tot"><div class="tot" id="totals"></div><div class="pc-pay"><div id="ptype"></div><button class="btn pri" data-act="pay">COBRAR (F2)</button></div></div></div></div>`;
-  renderCust();renderCart();$('#q').focus()}
+  renderCust();renderCart();$('#q').focus();fitPC()}
+function fitPC(){const t=document.querySelector('.top');if(t)document.documentElement.style.setProperty('--topH',t.offsetHeight+'px')}
+addEventListener('resize',fitPC);
 function vVentaM(){
   $('#view').innerHTML=`<div class="mv"><div class="panel" id="custPanel"></div><div class="sbar" style="margin:0">${QIN}<button class="btn pri" data-act="search">Buscar</button></div><div id="sugg"></div>
    <div class="panel" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end">${sellerSel()}<button class="btn" data-act="freeItem">＋ Ítem libre</button></div>
