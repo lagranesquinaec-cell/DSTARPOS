@@ -330,6 +330,7 @@ body.m .tkwrap{grid-template-columns:1fr!important}
 :root[data-fx=glass] .top,:root[data-fx=glass] .panel,:root[data-fx=glass] .pc-row,:root[data-fx=glass] .pc-info,:root[data-fx=glass] .cartw,:root[data-fx=glass] .tblw,:root[data-fx=glass] .dlg,:root[data-fx=glass] .tile-s,:root[data-fx=glass] .pc2,:root[data-fx=glass] .tile,:root[data-fx=glass] .cart,:root[data-fx=glass] .pt-r,:root[data-fx=glass] .tcard{background:var(--gl)!important;-webkit-backdrop-filter:blur(30px) saturate(210%);backdrop-filter:blur(30px) saturate(210%);border:1px solid rgba(255,255,255,.55)!important;box-shadow:var(--ge)!important;border-radius:30px!important}
 :root[data-fx=glass] .top{margin:12px 0 18px;padding:12px 20px 8px;border-radius:36px!important}
 :root[data-fx=glass] .top .row{max-width:none}
+:root[data-fx=glass] .top{background:var(--gl),#EEF1FF!important}:root[data-theme=dark][data-fx=glass] .top{background:var(--gl),#161233!important}
 :root[data-fx=glass] .pc-row,:root[data-fx=glass] .pc-info,:root[data-fx=glass] .panel,:root[data-fx=glass] .pt-r{border-radius:26px!important}
 :root[data-fx=glass] .pc-info .panel{background:rgba(255,255,255,.25)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;border-radius:22px!important}
 :root[data-fx=glass] h2{font-size:32px;font-weight:800;letter-spacing:-.035em}
@@ -470,7 +471,7 @@ body.m .tkwrap{grid-template-columns:1fr!important}
 :root[data-fx=claude] h2{font-size:28px}
 :root[data-fx=claude] .brand{font-size:19px;font-weight:400}
 :root[data-fx=claude] .brand i{width:12px;height:12px;border-radius:50%;transform:none;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
-:root[data-fx=claude] .top{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:0;box-shadow:none;padding-bottom:10px}
+:root[data-fx=claude] .top{background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:0;box-shadow:none;padding-bottom:10px}
 :root[data-fx=claude] nav{background:var(--surface);border:1px solid var(--line);border-radius:40px;padding:6px;gap:4px;box-shadow:var(--cl-hi),0 10px 30px -14px rgba(0,0,0,.6);width:max-content;max-width:100%;margin-top:10px}
 :root[data-fx=claude] nav a{border:0;border-radius:32px;padding:10px 18px;font-weight:500;color:var(--muted);flex-direction:column;gap:3px;font-size:12px;min-width:76px;justify-content:center;transition:background .2s,color .2s}
 :root[data-fx=claude] nav a svg{width:22px;height:22px}
@@ -511,7 +512,7 @@ body.m .tkwrap{grid-template-columns:1fr!important}
 :root[data-fx=nft] body::before{background:transparent}
 :root[data-fx=nft] .wrap{background:#352E40;border-radius:46px;margin:22px auto 30px;padding:18px 26px 28px;box-shadow:0 40px 80px -30px rgba(40,25,70,.6)}
 :root[data-fx=nft] body.pc .wrap{padding-left:106px}
-:root[data-fx=nft] .top{background:transparent;border:0;margin:0 0 12px!important;padding:6px 0 8px}
+:root[data-fx=nft] .top{background:#352E40;border:0;margin:0 0 12px!important;padding:6px 0 8px}
 :root[data-fx=nft] .top .row,:root[data-fx=nft] nav{max-width:none}
 :root[data-fx=nft] .brand{font-weight:900;font-size:22px}
 :root[data-fx=nft] body.pc nav a{background:rgba(255,255,255,.06);color:#B9B1C6}
@@ -574,7 +575,7 @@ body.m .tkwrap{grid-template-columns:1fr!important}
 :root[data-fx=fit] body::before{background:transparent}
 :root[data-fx=fit] .wrap{background:#fff;border-radius:46px;margin:20px auto 30px;padding:22px 28px 28px;box-shadow:0 0 0 10px rgba(255,255,255,.35),0 40px 80px -30px rgba(60,50,120,.5)}
 :root[data-fx=fit] body.pc .wrap{padding-left:128px}
-:root[data-fx=fit] .top{background:transparent;border:0;margin:0 0 12px!important;padding:0 0 8px}
+:root[data-fx=fit] .top{background:#fff;border:0;margin:0 0 12px!important;padding:0 0 8px}
 :root[data-fx=fit] .top .row,:root[data-fx=fit] nav{max-width:none}
 :root[data-fx=fit] body.pc nav{left:-110px;top:-6px;width:78px;height:calc(100vh - 54px);max-height:760px;background:linear-gradient(180deg,#7167C0,#5C51A8);border-radius:40px;padding:22px 0;overflow-y:auto;box-shadow:0 20px 40px -18px rgba(70,55,160,.7);scrollbar-width:none}
 :root[data-fx=fit] body.pc nav a{background:transparent;color:rgba(255,255,255,.72);border-radius:18px}
@@ -605,7 +606,7 @@ body.m .tkwrap{grid-template-columns:1fr!important}
 :root[data-fx=brut] body{background:radial-gradient(circle at -3% 24%,#EE5C86 0 150px,transparent 151px),radial-gradient(circle at 104% 98%,#7B61F0 0 230px,transparent 231px),#F7C948;background-attachment:fixed;font-weight:500}
 :root[data-fx=brut] body::before{background:transparent}
 :root[data-fx=brut] .wrap{background:#FFFDF6;border:4px solid #000;border-radius:34px;box-shadow:16px 16px 0 #000;margin:26px auto 44px;padding:0 24px 26px;max-width:1360px}
-:root[data-fx=brut] .top{background:transparent;border:0;margin:0 0 16px!important;padding:18px 0 0}
+:root[data-fx=brut] .top{background:#FFFDF6;border:0;margin:0 0 16px!important;padding:18px 0 0}
 :root[data-fx=brut] .top .row,:root[data-fx=brut] nav{max-width:none}
 :root[data-fx=brut] .brand{font-weight:900;font-size:22px;letter-spacing:-.03em}
 :root[data-fx=brut] .brand i{background:#000;transform:rotate(0)}
@@ -642,6 +643,15 @@ body.m .tkwrap{grid-template-columns:1fr!important}
 :root[data-fx=nft] body.pc nav a.on{background:#F3F0FA;color:#2A2335}
 :root[data-fx=fit] body.pc nav a.on{background:#4B418F;color:#fff;box-shadow:0 6px 14px -6px rgba(0,0,0,.4)}
 :root[data-fx=coin] body.pc nav a.on{color:#fff;background:rgba(255,255,255,.08)}
+/* ---- arreglos modo móvil (menú) y cabecera fija ---- */
+:root[data-fx=coin] body.m nav a.on{color:#111;background:#EEF1F8;border:1px solid #111}:root[data-fx=coin] body.m nav a.on svg{color:#111}
+:root[data-fx=brut] body.m nav{border-bottom:0;padding-top:6px}:root[data-fx=brut] body.m nav a{margin-bottom:0;border:3px solid #000;border-radius:14px}
+:root[data-fx=brut] body.m .seg{box-shadow:2px 2px 0 #000;max-width:100%}
+:root[data-fx=brut] body.m .top .row{padding-right:4px}
+:root[data-fx=nft] body.m nav a,:root[data-fx=fit] body.m nav a{margin-bottom:0}
+:root[data-fx=xp] body.m nav a{margin-bottom:0;border-radius:3px}
+body.m .top{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain}
+.top{isolation:isolate}
 :root[data-fx=nft] #custPanel .chip{background:rgba(43,36,56,.14);color:#2B2438}
 :root[data-fx=nft] td input,:root[data-fx=fit] td input,:root[data-fx=coin] td input{padding-inline:6px;text-align:center}
 :root[data-fx=brut] td input{padding-inline:6px;text-align:center}
