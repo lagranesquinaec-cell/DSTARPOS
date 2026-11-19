@@ -992,7 +992,7 @@ function vVentaPC(){
    <div class="pc-row"><div>${sellerSel()}</div><div><button class="btn" data-act="freeItem">＋ Ítem libre</button></div><div><span class="l">Fecha</span><b>${f}</b></div><div><span class="l">Lista de precios</span><select id="plist" data-chg="setList">${plOpts()}</select></div><div><span class="l">Venta No.</span><b style="font-size:15px">${nextNum()}</b></div></div>
    <div class="sbar" style="margin:0">${QIN}<button class="btn pri" data-act="search">Buscar</button></div><div id="sugg"></div>
    <section id="cartw" class="cartw tblw"></section>
-   <div class="pc-foot"><div class="panel pc-btns"><button class="btn" data-act="search">Buscar producto</button><button class="btn" data-act="hold">En espera</button><button class="btn" data-act="lastTicket">Re-imprimir último ticket</button><button class="btn bad" data-act="clearCart">Cancelar venta</button></div>
+   <div class="pc-foot"><div class="panel pc-btns"><button class="btn" data-act="search">Buscar producto</button><button class="btn" data-act="hold">En espera</button><button class="btn" data-act="lastTicket">Re-imprimir último ticket</button><button class="btn" data-act="proforma">Proforma${pfCount()?' · '+pfCount():''}</button><button class="btn bad" data-act="clearCart">Cancelar venta</button></div>
     <div class="panel pc-tot"><div class="tot" id="totals"></div><div class="pc-pay"><div id="ptype"></div><button class="btn pri" data-act="pay">COBRAR (F2)</button></div></div></div></div>`;
   renderCust();renderCart();$('#q').focus();fitPC()}
 function fitPC(){const t=document.querySelector('.top');if(t)document.documentElement.style.setProperty('--topH',t.offsetHeight+'px')}
@@ -1001,7 +1001,7 @@ function vVentaM(){
   $('#view').innerHTML=`<div class="mv"><div class="panel" id="custPanel"></div><div class="sbar" style="margin:0">${QIN}<button class="btn pri" data-act="search">Buscar</button></div><div id="sugg"></div>
    <div class="panel" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end">${sellerSel()}<button class="btn" data-act="freeItem">＋ Ítem libre</button></div>
    <section id="cartw" class="cartw tblw"></section>
-   <div class="panel"><label class="f" style="margin-bottom:10px">Lista de precios<select id="plist" data-chg="setList">${plOpts()}</select></label><div class="tot" id="totals"></div><div class="acts" style="margin-top:10px"><button class="btn" data-act="hold">En espera${S.held.length?' · '+S.held.length:''}</button><button class="btn bad" data-act="clearCart">Cancelar venta</button></div></div>
+   <div class="panel"><label class="f" style="margin-bottom:10px">Lista de precios<select id="plist" data-chg="setList">${plOpts()}</select></label><div class="tot" id="totals"></div><div class="acts" style="margin-top:10px"><button class="btn" data-act="hold">En espera${S.held.length?' · '+S.held.length:''}</button><button class="btn" data-act="proforma">Proforma${pfCount()?' · '+pfCount():''}</button><button class="btn bad" data-act="clearCart">Cancelar venta</button></div></div>
    <div class="vbar"><div class="vtop"><div><span class="muted small">Total</span><br><b id="barTot">$0.00</b></div><div id="ptype"></div></div><button class="btn pri" data-act="pay">Cobrar</button></div></div>`;
   renderCust();renderCart()}
 function tiersOf(p){if(!p)return[];return [0,1,2,3,4].filter(i=>p.p[i]>0).map(i=>({i,n:S.cfg.listNames[i],price:p.p[i],from:i===1?S.cfg.t2:i===2?S.cfg.t3:i===3?p.bulto:1}))}
@@ -1126,11 +1126,11 @@ function payVals(){const o={};for(const k in PAY)o[k]=r2(num(($('#pay_'+k)||{}).
 function payInfo(){
   const T=curTotals(),v=payVals(),paid=r2(Object.values(v).reduce((a,b)=>a+b,0)),box=$('#payInfo');if(!box)return;const diff=r2(paid-T.total);
   if(diff<0){box.className='change bad';box.innerHTML=`<span>Falta</span><b>${money(-diff)}</b>`}
-  else if(diff>v.efectivo){box.className='change bad';box.innerHTML=`<span>Se pasa del total por ${money(diff)}. Solo el efectivo puede dar cambio; baje el monto de transferencia/tarjeta.</span>`}
-  else{box.className='change ok';box.innerHTML=`<span>Cambio a devolver</span><b>${money(diff)}</b>`}}
+  else if(diff>r2(paid-v.tarjeta)){box.className='change bad';box.innerHTML=`<span>Se pasa del total por ${money(diff)}. La tarjeta no puede dar cambio; baje el monto de la tarjeta.</span>`}
+  else{const dig=diff>0&&v.efectivo<=0&&(v.transferencia>0||v.qr>0);box.className='change ok';box.innerHTML=`<span>${dig?'Pagó de más · cambio a devolver':'Cambio a devolver'}</span><b>${money(diff)}</b>`}}
 function confirmPay(){
   const T=curTotals(),v=payVals(),paid=r2(Object.values(v).reduce((a,b)=>a+b,0)),diff=r2(paid-T.total);
-  if(diff<0)return toast('El pago no cubre el total.',1);if(diff>v.efectivo)return toast('Se pasa del total: solo el efectivo puede dar cambio. Ajuste transferencia/tarjeta.',1);
+  if(diff<0)return toast('El pago no cubre el total.',1);if(diff>r2(paid-v.tarjeta))return toast('Se pasa del total: la tarjeta no puede dar cambio. Ajuste el monto de la tarjeta.',1);
   const c=cust(S.cart.customerId);if(v.credito>0&&c.id==='cf')return toast('Elija un cliente para vender a crédito.',1);
   const pays=Object.entries(v).filter(([k,a])=>a>0).map(([m,amt])=>({m,amt}));
   finishSale(pays,Math.max(0,diff),0,'')}
@@ -1170,7 +1170,7 @@ const LEGAL_DEF='Este ticket no tiene validez tributaria, puede solicitar una no
 const tk=k=>(S.cfg.tk||{})[k]!==false;
 const legalTxt=()=>(S.cfg.legal||'').trim()||LEGAL_DEF;
 function prn(fmt){const c=S.cfg,p80=(fmt||c.paper)==='pos80',g=(k,d)=>{const v=num(c[k]);return v>0?v:d},paper=g('pPaper',p80?80:58);
-  return {paper,iw:Math.min(paper,g('pPrintable',p80?72:48)),fs:g('pFont',p80?13:12),bold:c.pBold!==false,logo:g('pLogo',24),dpi:g('pDpi',203),feed:Math.min(12,Math.max(0,Math.round(num(c.feed??2))))}}
+  return {paper,iw:Math.min(paper,g('pPrintable',p80?72:48)),fs:g('pFont',p80?13:12),bold:c.pBold!==false,logo:g('pLogo',24),dpi:g('pDpi',203),feed:Math.min(12,Math.max(0,Math.round(num(c.feed??2)))),feedMm:Math.min(80,Math.max(0,num(c.feedMm??25)))}}
 function receiptHTML(s){
   const c=S.cfg;const pay=s.pays.map(p=>`<tr><td>${PAY[p.m].n}</td><td class="r">${money(p.amt)}</td></tr>`).join('');
   const head=[tk('ruc')&&c.ruc?'RUC: '+esc(c.ruc):'',tk('addr')&&c.addr?esc(c.addr):'',tk('tel')&&c.tel?'Tel. '+esc(c.tel):''].filter(Boolean).join('<br>');
@@ -1230,9 +1230,9 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th{background:#eee;tex
 <div class="ft"><div><b>Forma de pago:</b> ${esc(pay)}${s.change>0?'<br>Cambio: '+m(s.change):''}${s.balance>0?'<br><b>Saldo por cobrar: '+m(s.balance)+'</b>'+(s.due?' · vence '+esc(s.due):''):''}</div>
 <table class="tt"><tbody>${T.map(x=>`<tr><td>${x[0]}</td><td class="r">${x[1]}</td></tr>`).join('')}<tr class="g"><td>TOTAL</td><td class="r">${m(s.total)}</td></tr></tbody></table></div>
 ${tk('footer')&&c.footer?`<div class="th">${esc(c.footer).replace(/\n/g,'<br>')}</div>`:''}${tk('legal')?`<div class="th lg2">${esc(legalTxt())}</div>`:''}</body></html>`}
-function ticketFile(s,fmt){fmt=fmt||S.cfg.paper||'pos58';if(fmt==='a4')return a4File(s);const P=prn(fmt),a4=false,w=P.iw+'mm',fs=P.fs+'px',feed=P.feed;
+function ticketFile(s,fmt){fmt=fmt||S.cfg.paper||'pos58';if(fmt==='a4')return a4File(s);const P=prn(fmt),a4=false,w=P.iw+'mm',fs=P.fs+'px',feed=P.feedMm;
   const page=`@page{size:${P.paper}mm auto;margin:0}`;
-  return `<!doctype html><html lang="es"><meta charset="utf-8"><title>${esc(s.doc)} ${esc(s.num)}</title><style>${page}body{font-family:'Courier New',monospace;font-size:${fs};width:${w};margin:0 auto;padding:2mm 0;color:#000${P.bold?';font-weight:700;-webkit-text-stroke:.25px #000':''}}h4{margin:0;text-align:center;font-size:${a4?'20px':'14px'}}.c{text-align:center}hr{border:0;border-top:1px dashed #000}table{width:100%;border-collapse:collapse}td,th{padding:${a4?'4px':'1px'} 0;text-align:left;vertical-align:top}.r{text-align:right}.noprint{margin:8px 0;padding:8px 14px}@media print{.noprint{display:none}}</style><body><button class="noprint" onclick="print()">Imprimir</button>${a4?`<div class="c"><img src="${LOGO}" width="80" height="80" style="border-radius:12px"></div>`:''}${receiptHTML(s)}${feed?`<div style="height:${feed*1.5}em;line-height:1">&nbsp;</div>`:''}</body></html>`}
+  return `<!doctype html><html lang="es"><meta charset="utf-8"><title>${esc(s.doc)} ${esc(s.num)}</title><style>${page}body{font-family:'Courier New',monospace;font-size:${fs};width:${w};margin:0 auto;padding:2mm 0;color:#000${P.bold?';font-weight:700;-webkit-text-stroke:.25px #000':''}}h4{margin:0;text-align:center;font-size:${a4?'20px':'14px'}}.c{text-align:center}hr{border:0;border-top:1px dashed #000}table{width:100%;border-collapse:collapse}td,th{padding:${a4?'4px':'1px'} 0;text-align:left;vertical-align:top}.r{text-align:right}.noprint{margin:8px 0;padding:8px 14px}@media print{.noprint{display:none}}</style><body><button class="noprint" onclick="print()">Imprimir</button>${a4?`<div class="c"><img src="${LOGO}" width="80" height="80" style="border-radius:12px"></div>`:''}${receiptHTML(s)}${feed?`<div style="height:${feed}mm"></div><div class="c" style="font-size:14px;line-height:1;font-weight:700">.</div><div style="height:2mm"></div>`:''}</body></html>`}
 function printReceipt(s){const f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';
   f.onload=()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast('No se pudo abrir la impresión: use Descargar.',1)}setTimeout(()=>f.remove(),60000)};f.srcdoc=ticketFile(s);document.body.appendChild(f);toast('Preparando impresión… si no aparece, use Descargar.')}
 let rcpt=null;
@@ -1262,20 +1262,91 @@ function ticketCanvas(s){
     y+=44;T('TOTAL',L,'700 22px '+F,'#111');T(money(s.total),R,'800 36px '+F,ACC,'right');y+=6;
     if(tk('payments')){for(const p of s.pays)row((PAYE[p.m]||'')+' '+PAY[p.m].n,money(p.amt));if(s.change>0)row('Cambio',money(s.change))}
     if(s.balance>0){y+=34;if(!dry)rr(L-8,y-16,IW+16,64,12,'#FDECEC');y+=14;T('Saldo por cobrar',L,'700 17px '+F,'#B42318');T(money(s.balance),R,'800 22px '+F,'#B42318','right');if(s.due){y+=24;T('Vence: '+s.due,L,'14px '+F,'#B42318')}y+=8}
-    y+=30;if(tk('footer')&&c.footer){String(c.footer).split(/\n/).forEach(t=>{y+=26;T(t.trim(),W/2,'600 18px '+F,ACC,'center')})}
-    if(tk('legal')){wrap(legalTxt(),IW,'12px '+F).forEach(t=>{y+=18;T(t,W/2,'12px '+F,'#aaa','center')})}
+    y+=30;if(tk('footer')&&c.footer&&!s.proforma){String(c.footer).split(/\n/).forEach(t=>{y+=26;T(t.trim(),W/2,'600 18px '+F,ACC,'center')})}
+    if(s.proforma||tk('legal')){wrap(s.proforma?PF_LEGAL:legalTxt(),IW,'12px '+F).forEach(t=>{y+=18;T(t,W/2,'12px '+F,'#aaa','center')})}
     return y+44};
   let H=0;cv.width=W*2;cv.height=10;ctx.scale(2,2);H=run(true);cv.height=H*2;ctx.scale(2,2);
   ctx.fillStyle='#EEF0FA';ctx.fillRect(0,0,W,H);run(false);return cv}
-async function waImg(s,n){const cv=ticketCanvas(s),bp=new Promise(r=>cv.toBlob(r,'image/png'));
-  let ok=false;try{await navigator.clipboard.write([new ClipboardItem({'image/png':bp})]);ok=true}catch(e){}
-  if(!ok){toast('No se pudo copiar la imagen; elija el contacto o use Descargar.',1);return shareTicketImg(s)}
-  const a=document.createElement('a');a.href='https://wa.me/'+n;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();toast('Imagen copiada ✔ En el chat pegue la imagen (Ctrl+V, o mantenga presionado el cuadro de mensaje → Pegar) y envíe.')}
+async function copyTicketImg(s){const cv=ticketCanvas(s),bp=new Promise(r=>cv.toBlob(r,'image/png'));
+  try{await navigator.clipboard.write([new ClipboardItem({'image/png':bp})]);toast('Comprobante copiado como imagen ✔ Pegue la imagen donde la necesite.')}
+  catch(e){toast('Este equipo no permite copiar la imagen; guárdela desde aquí.',1);return shareTicketImg(s)}}
 async function shareTicketImg(s){
   const cv=ticketCanvas(s),url=cv.toDataURL('image/png'),name=(s.num||'ticket')+'.png';
   const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
   try{const f=new File([blob],name,{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:S.cfg.name});return}}catch(e){if(e&&e.name==='AbortError')return}
   modal(`${dlgHead('Imagen del comprobante')}<p class="muted small" style="margin:0">Mantenga presionada la imagen para guardarla o compartirla por WhatsApp.</p><img src="${url}" alt="" style="width:100%;border-radius:10px"><div class="ft"><a class="btn pri" download="${esc(name)}" href="${url}">Descargar</a><button class="btn" data-act="closeModal">Cerrar</button></div>`)}
+
+/* ---- proformas (cotizaciones): se guardan aparte y se borran solas a los 2 días ---- */
+const PFK='star_pos_proformas',PF_DAYS=2,PF_LEGAL='Proforma informativa: no es un comprobante de venta ni tiene validez tributaria.';
+function pfLoad(){let o={seq:1,items:[]};try{const r=localStorage.getItem(PFK);if(r){const j=JSON.parse(r);if(j&&Array.isArray(j.items))o={seq:j.seq||1,items:j.items}}}catch(e){}
+  const lim=Date.now()-PF_DAYS*864e5;o.items=o.items.filter(x=>x&&x.ts>=lim);return o}
+function pfSave(o){try{localStorage.setItem(PFK,JSON.stringify(o))}catch(e){toast('No se pudo guardar la proforma en este navegador.',1)}}
+function pfPurge(){try{const r=localStorage.getItem(PFK);if(!r)return;const j=JSON.parse(r),o=pfLoad();if(j&&j.items&&j.items.length!==o.items.length)pfSave(o)}catch(e){}}
+const pfCount=()=>{try{return pfLoad().items.length}catch(e){return 0}};
+try{pfPurge()}catch(e){}setInterval(pfPurge,36e5);
+let curPf=null;
+function makeProforma(){
+  const L=cartLines();if(!L.length){const n=pfCount();return n?pfList():toast('Agregue productos al carrito para hacer una proforma.',1)}
+  const T=curTotals(),cc=S.cart.customerId,c=cc==='new'?{id:'cf',name:(S.cart.cust.name||'').trim()||'CONSUMIDOR FINAL',ident:S.cart.cust.ident||'',tipo:'cf'}:cust(cc);
+  const o=pfLoad(),pf={id:uid(),proforma:true,num:'PF-'+String(o.seq).padStart(4,'0'),ts:Date.now(),doc:'Proforma',customerId:c.id,custName:c.name,custIdent:c.ident,custTipo:c.tipo,
+    lines:T.lines.map(l=>({pid:l.pid,code:l.code,name:l.name,qty:l.qty,price:l.price,disc:l.disc||0,iva:l.iva,tot:l.tot})),
+    sub0:T.sub0,subIva:T.subIva,iva:T.iva,disc:T.disc,total:T.total,ivaRate:S.cfg.ivaRate,incIva:S.cfg.incIva,pays:[],change:0,balance:0,due:'',seller:S.cfg.cur||'',status:'ok',
+    cart:{lines:JSON.parse(JSON.stringify(S.cart.lines)),gd:S.cart.gd||0}};
+  o.seq++;o.items.push(pf);pfSave(o);showProforma(pf)}
+function showProforma(pf){curPf=pf;const url=ticketCanvas(pf).toDataURL('image/png');
+  modal(`${dlgHead('Proforma '+esc(pf.num))}<p class="muted small" style="margin:0">Total: <b class="money">${money(pf.total)}</b> · No descuenta stock ni entra a la caja. Se borra sola a los ${PF_DAYS} días.</p><img src="${url}" alt="Proforma" style="width:100%;max-height:55vh;object-fit:contain;border-radius:10px;background:#EEF0FA">
+  <div class="ft"><button class="btn pri" data-act="pfImg">🖼 Copiar imagen</button><button class="btn" data-act="pfPdf">📄 PDF</button><button class="btn" data-act="pfShare">Compartir / guardar imagen</button><button class="btn" data-act="pfCart" data-id="${pf.id}">Cargar al carrito</button><button class="btn" data-act="closeModal">Cerrar</button></div>`)}
+function pfList(){const L=pfLoad().items.slice().reverse();
+  modal(`${dlgHead('Proformas guardadas')}<p class="muted small" style="margin:0">Se borran solas pasados ${PF_DAYS} días.</p><div style="max-height:55vh;overflow:auto;display:grid;gap:8px">${L.map(x=>{const h=Math.max(1,Math.ceil((x.ts+PF_DAYS*864e5-Date.now())/36e5));return `<div class="panel" style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.num)}</b> · ${esc(x.custName)}<div class="muted small">${fmtDT(x.ts)} · se borra en ${h} h</div></div><div style="display:flex;gap:6px;align-items:center"><b class="money">${money(x.total)}</b><button class="btn sm" data-act="pfOpen" data-id="${x.id}">Abrir</button><button class="btn sm bad" data-act="pfDel" data-id="${x.id}">Borrar</button></div></div>`}).join('')||empty('No hay proformas guardadas.')}</div>`)}
+function pfCart(id){const pf=pfLoad().items.find(x=>x.id===id);if(!pf||!pf.cart)return toast('Esa proforma ya no está disponible.',1);
+  const go=()=>{S.cart.lines=JSON.parse(JSON.stringify(pf.cart.lines));S.cart.gd=pf.cart.gd||0;if(pf.customerId&&pf.customerId!=='cf'&&S.customers.some(c=>c.id===pf.customerId))S.cart.customerId=pf.customerId;save(true);closeModal();render();toast('Proforma cargada al carrito.')};
+  S.cart.lines.length?confirmBox('El carrito actual se reemplazará por los productos de la proforma.',go,'Reemplazar',1):go()}
+function pdfFromCanvas(cv){
+  const j=atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),pw=595,ih=Math.round(cv.height*pw/cv.width),ph=ih,parts=[],offs=[];let len=0;
+  const add=t=>{parts.push(t);len+=t.length},obj=(n,b)=>{offs[n]=len;add(`${n} 0 obj\n${b}\nendobj\n`)};
+  add('%PDF-1.4\n');obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`);
+  offs[4]=len;add(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${cv.width} /Height ${cv.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${j.length} >>\nstream\n`);add(j);add('\nendstream\nendobj\n');
+  const c=`q ${pw} 0 0 ${ih} 0 ${ph-ih} cm /Im0 Do Q`;obj(5,`<< /Length ${c.length} >>\nstream\n${c}\nendstream`);
+  const x=len;add('xref\n0 6\n0000000000 65535 f \n'+[1,2,3,4,5].map(n=>String(offs[n]).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${x}\n%%EOF`);
+  const t=parts.join(''),u=new Uint8Array(t.length);for(let i=0;i<t.length;i++)u[i]=t.charCodeAt(i)&255;return new Blob([u],{type:'application/pdf'})}
+async function pfPdf(pf){const blob=pdfFromCanvas(ticketCanvas(pf)),name='Proforma-'+pf.num+'.pdf';
+  try{const f=new File([blob],name,{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:S.cfg.name});return}}catch(e){if(e&&e.name==='AbortError')return}
+  const url=URL.createObjectURL(blob);modal(`${dlgHead('PDF de la proforma')}<p class="muted small" style="margin:0">Descargue el PDF y envíelo por WhatsApp.</p><div class="ft"><a class="btn pri" download="${esc(name)}" href="${url}">Descargar PDF</a><button class="btn" data-act="pfOpen" data-id="${pf.id}">Volver</button></div>`)}
+
+/* ---- códigos de barras (Code 128) y etiquetas ---- */
+const C128=('212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112').split(' ');
+function code128(txt){txt=String(txt);const dig=/^\d+$/.test(txt)&&txt.length%2===0;let v;
+  if(dig){v=[105];for(let i=0;i<txt.length;i+=2)v.push(+txt.slice(i,i+2))}
+  else{v=[104];for(const ch of txt){const c=ch.charCodeAt(0);if(c<32||c>126)return null;v.push(c-32)}}
+  let sum=v[0];for(let i=1;i<v.length;i++)sum+=v[i]*i;v.push(sum%103,106);return v.map(x=>C128[x]).join('')}
+function nextInternalCode(){let m=2000000000;for(const p of S.products){for(const c of [p.code,p.boxCode]){if(/^2\d{9}$/.test(c||'')&&+c>m)m=+c}}return String(m+1)}
+function barcodeCanvas(code,name,price){
+  const bars=code128(code);if(!bars)return null;
+  const W=640,F='-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif',cv=document.createElement('canvas'),x=cv.getContext('2d');
+  let mod=0;for(const ch of bars)mod+=+ch;const quiet=10,u=Math.max(1,Math.floor((W-60)/(mod+quiet*2))),bw=mod*u,bx=Math.round((W-bw)/2);
+  x.font='700 30px '+F;const wrap=[];let l='';for(const w of String(name||'').split(' ')){const n=l?l+' '+w:w;if(x.measureText(n).width>W-60&&l){wrap.push(l);l=w}else l=n}if(l)wrap.push(l);const nl=wrap.slice(0,2),top=name?20+nl.length*38:20,bh=150,H=top+bh+(price?110:60);
+  cv.width=W*2;cv.height=H*2;x.scale(2,2);x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#000';x.textAlign='center';
+  x.font='700 30px '+F;nl.forEach((t,i)=>x.fillText(t,W/2,38+i*38));
+  let cx=bx,bar=true;for(const ch of bars){const w=+ch*u;if(bar)x.fillRect(cx,top,w,bh);cx+=w;bar=!bar}
+  x.font='24px "Courier New",monospace';x.fillText(code,W/2,top+bh+32);
+  if(price){x.font='800 44px '+F;x.fillText(price,W/2,top+bh+90)}
+  return cv}
+let curBar=null;
+function barLabelOpen(){const code=($('#e_code').value||'').trim(),name=($('#e_name').value||'').trim().toUpperCase(),pv=num(($('#e_p0')||{}).value);
+  if(!code)return toast('Primero escriba o genere un código.',1);if(!code128(code))return toast('El código solo puede tener letras, números y símbolos comunes (sin tildes ni ñ).',1);
+  curBar={code,name,price:pv>0?money(pv):''};barShow()}
+function barShow(){const o=curBar,cv=barcodeCanvas(o.code,o.showName===false?'':o.name,o.showPrice===false?'':o.price);if(!cv)return toast('No se pudo crear el código.',1);o.cv=cv;
+  const ov=document.getElementById('barov')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'barov'}));ov.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:12px';
+  ov.innerHTML=`<div class="dlg wide" role="dialog" style="position:relative;max-height:92vh;overflow:auto"><div class="hd"><h3>Etiqueta con código de barras</h3><button class="btn sm" data-act="closeBar">Cerrar</button></div><img src="${cv.toDataURL('image/png')}" alt="Código de barras" style="width:100%;border:1px solid #ddd;border-radius:10px;background:#fff">
+  <div style="display:grid;gap:6px"><label class="ck"><input type="checkbox" ${o.showName===false?'':'checked'} onchange="barOpt('showName',this.checked)"> Mostrar nombre del producto</label>${o.price?`<label class="ck"><input type="checkbox" ${o.showPrice===false?'':'checked'} onchange="barOpt('showPrice',this.checked)"> Mostrar precio (${esc(o.price)})</label>`:''}</div>
+  <p class="muted small" style="margin:0">Guarde la imagen e imprímala en etiquetas adhesivas. Código: <b>${esc(o.code)}</b> · Recuerde guardar el producto para que el código quede registrado.</p>
+  <div class="ft"><button class="btn pri" data-act="barCopy">🖼 Copiar imagen</button><button class="btn" data-act="barShare">Compartir / guardar</button><a class="btn" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center" download="codigo-${esc(o.code)}.png" href="${cv.toDataURL('image/png')}">Descargar</a><button class="btn" data-act="closeBar">Cerrar</button></div></div>`}
+function barOpt(k,v){curBar[k]=v;barShow()}
+async function barCopy(){const cv=curBar.cv;try{await navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(r=>cv.toBlob(r,'image/png'))})]);toast('Etiqueta copiada como imagen ✔')}catch(e){toast('Este equipo no permite copiar; use Descargar o Compartir.',1)}}
+async function barShare(){const cv=curBar.cv,blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+  try{const f=new File([blob],'codigo-'+curBar.code+'.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}catch(e){if(e&&e.name==='AbortError')return}
+  toast('Use el botón Descargar, o mantenga presionada la imagen para guardarla.')}
 
 function waNum(v){let d=String(v||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('0'))d='593'+d.slice(1);else if(d.length===9&&d[0]==='9')d='593'+d;return d.length>=11&&d.length<=15?d:''}
 const waClean=t=>t.replace(/▪️?/g,'•').replace(/\p{Extended_Pictographic}[\uFE0F\u200D\p{Extended_Pictographic}]*\s?/gu,'').replace(/\uFE0F/g,'');
@@ -1283,8 +1354,8 @@ function waUrl(s,num){return 'https://wa.me/'+num+'?text='+encodeURIComponent(wa
 function waOpen(s,num){const a=document.createElement('a');a.href=waUrl(s,num);a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()}
 function showReceipt(s,fresh){rcpt=s;
   modal(`${dlgHead(fresh?'Venta registrada':'Comprobante')}${fresh&&s.change>0?`<div class="change ok"><span>Cambio a devolver</span><b>${money(s.change)}</b></div>`:''}<div class="ticket" id="tk">${receiptHTML(s)}</div>
-  <div class="bar" style="margin:0"><label class="f grow">WhatsApp del cliente<input id="wa_num" type="tel" inputmode="tel" value="${esc(cust(s.customerId).tel||'')}" placeholder="09XXXXXXXX"></label><button class="btn pri" data-act="rcptWa" style="align-self:flex-end">Enviar por WhatsApp</button></div><div class="muted small" style="margin-top:-6px">Escriba el número y toque «Enviar como imagen»: se copia la imagen y se abre el chat de ese número; solo pegue (Ctrl+V, o mantener presionado → Pegar) y envíe. Sin número escrito, se abre la lista para elegir contacto.</div>
-  <div class="ft"><select data-cfg="paper" data-t="s" style="width:auto" aria-label="Papel">${paperOpts()}</select><button class="btn pri" data-act="rcptImg">🖼 Enviar como imagen</button><button class="btn" data-act="rcptPrint">Imprimir</button><button class="btn" data-act="rcptFile">Descargar</button><button class="btn" data-act="rcptCopy">Copiar texto</button>${!fresh&&s.status==='ok'?`<button class="btn" data-act="retOpen" data-id="${s.id}">↩ Devolución / cambio</button><button class="btn bad" data-act="voidAsk" data-id="${s.id}">Anular venta</button>`:''}<button class="btn pri" data-act="closeModal" autofocus>${fresh?'Nueva venta':'Cerrar'}</button></div>`)}
+  <div class="bar" style="margin:0"><label class="f grow">WhatsApp del cliente<input id="wa_num" type="tel" inputmode="tel" value="${esc(cust(s.customerId).tel||'')}" placeholder="09XXXXXXXX"></label><button class="btn pri" data-act="rcptWa" style="align-self:flex-end">Enviar por WhatsApp</button></div><div class="muted small" style="margin-top:-6px">«Enviar por WhatsApp» manda el comprobante en texto. Para mandarlo como imagen use «Copiar comprobante en imagen» y péguelo en el chat (Ctrl+V, o mantener presionado → Pegar).</div>
+  <div class="ft"><select data-cfg="paper" data-t="s" style="width:auto" aria-label="Papel">${paperOpts()}</select><button class="btn pri" data-act="rcptImg">🖼 Copiar comprobante en imagen</button><button class="btn" data-act="rcptPrint">Imprimir</button><button class="btn" data-act="rcptFile">Descargar</button><button class="btn" data-act="rcptCopy">Copiar texto</button>${!fresh&&s.status==='ok'?`<button class="btn" data-act="retOpen" data-id="${s.id}">↩ Devolución / cambio</button><button class="btn bad" data-act="voidAsk" data-id="${s.id}">Anular venta</button>`:''}<button class="btn pri" data-act="closeModal" autofocus>${fresh?'Nueva venta':'Cerrar'}</button></div>`)}
 
 /* ---- clientes en venta ---- */
 function pickCustomer(){
@@ -1337,12 +1408,16 @@ function prodList(){
   $('#pbody').innerHTML=`<div class="muted small" style="margin-bottom:8px">${L.length} de ${S.products.length-(prod('p_libre')?1:0)} productos${L.length>200?' · se muestran 200, afine la búsqueda':''}</div><div class="pgrid">${rows||empty('Sin resultados.')}</div>`}
 function tierLabel(i){const n=S.cfg.listNames[i];return i===1?`${n} (desde ${S.cfg.t2} u.)`:i===2?`${n} (desde ${S.cfg.t3} u.)`:i===3?`${n} (por bulto)`:i===4?`${n} (comerciantes, solo si se elige)`:n}
 const tierWhen=i=>i===0?'Desde 1 unidad':i===1?`Desde ${S.cfg.t2} unidades`:i===2?`Desde ${S.cfg.t3} unidades`:i===3?'Al llevar 1 bulto completo':'⭐ Solo clientes aliados';
+function lineOpts(cur){const L=[...new Set(S.products.map(x=>(x.line||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));cur=(cur||'').trim();if(cur&&!L.includes(cur))L.unshift(cur);
+  return (cur?'':'<option value="" selected>— Elegir línea —</option>')+L.map(x=>`<option value="${esc(x)}"${x===cur?' selected':''}>${esc(x)}</option>`).join('')+'<option value="__new">➕ Nueva línea…</option>'}
+function lineVal(){const v=$('#e_line').value;return v==='__new'?$('#e_newline').value.trim():v}
 function editProd(id){
   const p=id?prod(id):{id:'',code:'',name:'',line:'INVENTARIO',cost:0,p:[0,0,0,0,0],iva:false,track:false,stock:0,min:0,active:true,bulto:0,boxCode:'',supplier:''};
   modal(`${dlgHead(id?'Editar producto':'Nuevo producto')}<div class="fgrid">
    <label class="f">Código de barras / interno<input id="e_code" value="${esc(p.code)}" ${id?'':'autofocus'}></label><label class="f" style="grid-column:span 2">Descripción<input id="e_name" value="${esc(p.name)}"></label>
-   <label class="f">Línea<input id="e_line" value="${esc(p.line)}"></label><label class="f">Costo<input id="e_cost" type="number" step="0.01" min="0" value="${p.cost}" data-inp="margin"></label></div>
-   <div><div style="font-weight:700">Precios de venta</div><div class="muted small" style="margin:2px 0 8px">El sistema elige solo el precio según las unidades que lleve el cliente. Deje en 0 los que no use.</div>
+   <label class="f">Línea<select id="e_line" onchange="$('#e_newline').hidden=this.value!=='__new';if(!$('#e_newline').hidden)$('#e_newline').focus()">${lineOpts(p.line)}</select><input id="e_newline" placeholder="Nombre de la nueva línea" hidden style="margin-top:6px"></label><label class="f">Costo<input id="e_cost" type="number" step="0.01" min="0" value="${p.cost}" data-inp="margin"></label></div>
+   <div class="bar" style="margin:0;gap:8px"><button type="button" class="btn sm" data-act="genCode">🔢 Generar código</button><button type="button" class="btn sm" data-act="barLabel">🏷 Etiqueta con código de barras</button></div>
+      <div><div style="font-weight:700">Precios de venta</div><div class="muted small" style="margin:2px 0 8px">El sistema elige solo el precio según las unidades que lleve el cliente. Deje en 0 los que no use.</div>
    <div class="ptab">${[0,1,2,3,4].map(i=>`<div class="pt-r pt-${i}"><div class="pt-t"><b>${esc(S.cfg.listNames[i])}</b><small>${tierWhen(i)}</small></div><div class="pt-i"><span>$</span><input id="e_p${i}" type="number" step="0.01" min="0" value="${p.p[i]||0}" data-inp="margin" aria-label="${esc(S.cfg.listNames[i])}"></div><div class="pt-m" id="m_p${i}"></div></div>`).join('')}</div>
    <div class="fgrid" style="margin-top:10px"><label class="f">Unidades por bulto / caja<input id="e_bulto" type="number" step="1" min="0" value="${p.bulto||0}" placeholder="0 = sin bulto"></label><label class="f" style="grid-column:span 2">Código de barras de la caja (opcional)<input id="e_box" value="${esc(p.boxCode||'')}" placeholder="Solo si la caja trae un código distinto"></label></div>
    <div class="muted small" style="margin-top:6px">Al escanear el código de la caja se agregan las unidades por bulto y se descuentan del stock. El precio ⭐ Aliado se aplica solo a clientes aliados y nunca es mayor que el más bajo de los otros.</div><div id="mg" class="muted small" style="margin-top:4px"></div><details class="ptools" ontoggle="if(this.open&&!$('#pc_u').value)pcFill()"><summary>🧮 Calculadora de precios (cuánto quiero ganar)</summary>${pcalcHTML()}</details></div>
@@ -1354,7 +1429,7 @@ function margin(){const c=num($('#e_cost').value);for(let i=0;i<5;i++){const q=n
 function saveProd(id){
   const code=$('#e_code').value.trim(),name=$('#e_name').value.trim().toUpperCase();if(!code||!name)return toast('Código y descripción son obligatorios.',1);
   if(S.products.some(p=>p.code.toLowerCase()===code.toLowerCase()&&p.id!==id))return toast('Ya existe un producto con ese código.',1);
-  const d={code,name,line:$('#e_line').value.trim(),cost:num($('#e_cost').value),p:[0,1,2,3,4].map(i=>num($('#e_p'+i).value)),iva:$('#e_iva').checked,active:$('#e_active').checked,track:$('#e_track').checked,min:num($('#e_min').value),bulto:Math.max(0,Math.floor(num($('#e_bulto').value))),boxCode:$('#e_box').value.trim(),supplier:$('#e_sup').value};
+  const d={code,name,line:lineVal(),cost:num($('#e_cost').value),p:[0,1,2,3,4].map(i=>num($('#e_p'+i).value)),iva:$('#e_iva').checked,active:$('#e_active').checked,track:$('#e_track').checked,min:num($('#e_min').value),bulto:Math.max(0,Math.floor(num($('#e_bulto').value))),boxCode:$('#e_box').value.trim(),supplier:$('#e_sup').value};
   if(d.boxCode){if(d.bulto<1)return toast('Para usar código de caja indique las unidades por bulto.',1);if(d.boxCode.toLowerCase()===code.toLowerCase()||S.products.some(x=>x.id!==id&&(x.code.toLowerCase()===d.boxCode.toLowerCase()||(x.boxCode||'').toLowerCase()===d.boxCode.toLowerCase())))return toast('Ese código de caja ya está usado por otro producto.',1)}
   if(id)Object.assign(prod(id),d);else{const np={id:'p'+uid(),stock:0,...d};np.stock=num($('#e_stock').value);S.products.push(np);if(pendingAdd){pendingAdd=false;S._add=np}if(np.track&&np.stock)S.moves.push({id:uid(),ts:Date.now(),pid:np.id,name:np.name,type:'ajuste',qty:np.stock,ref:'Stock inicial'})}
   save(true);const _a=S._add;delete S._add;closeModal();toast('Producto guardado.');render();if(_a){addToCart(_a,1);toast('Producto creado y agregado a la venta.')}}
@@ -1541,7 +1616,7 @@ function sampleSale(){return {doc:S.cfg.docType,num:(S.cfg.estab||'001')+'-'+(S.
 function refreshPrev(){const p=$('#tkPrev');if(p)p.innerHTML=receiptHTML(sampleSale())}
 function printerPanel(){const c=S.cfg,P=prn(),N=(k,l,v,st,mn,mx)=>`<label class="f">${l}<input type="number" step="${st||1}" min="${mn||0}" ${mx?`max="${mx}"`:''} data-cfg="${k}" data-t="n" value="${v}"></label>`;
   return `<div class="panel" style="margin-bottom:16px"><h3 style="margin-bottom:4px">🖨 Impresora de tickets</h3><p class="muted" style="margin:0 0 12px">Ajuste aquí la medida de su impresora y el ticket se adapta solo. Para su <b>H-58B</b> (papel 58 mm, imprime 48 mm, 203 dpi, ESC/POS) ya vienen los valores correctos; use «Restablecer» si movió algo.</p>
-  <div class="fgrid"><label class="f">Tipo de papel<select data-cfg="paper" data-t="s">${paperOpts()}</select></label>${N('pPaper','Ancho del papel (mm)',P.paper)}${N('pPrintable','Ancho que realmente imprime (mm)',P.iw)}${N('pFont','Tamaño de letra (px)',P.fs,0.5,8,24)}${N('pLogo','Tamaño del logo (mm)',P.logo,1,10,60)}${N('pDpi','Resolución (dpi)',P.dpi,1,100,600)}${N('feed','Líneas en blanco al final',c.feed??2,1,0,12)}</div>
+  <div class="fgrid"><label class="f">Tipo de papel<select data-cfg="paper" data-t="s">${paperOpts()}</select></label>${N('pPaper','Ancho del papel (mm)',P.paper)}${N('pPrintable','Ancho que realmente imprime (mm)',P.iw)}${N('pFont','Tamaño de letra (px)',P.fs,0.5,8,24)}${N('pLogo','Tamaño del logo (mm)',P.logo,1,10,60)}${N('pDpi','Resolución (dpi)',P.dpi,1,100,600)}${N('feedMm','Espacio al final antes del corte (mm)',P.feedMm,1,0,80)}</div><div class="muted small">Si el corte se come el final del ticket, suba este número de 5 en 5. Al final se imprime un puntito para que la impresora no recorte el espacio en blanco.</div>
   <label class="ck" style="margin-top:10px"><input type="checkbox" data-cfg="pBold" data-t="b" ${c.pBold!==false?'checked':''}> Letra en negrita (se lee mejor en papel térmico)</label>
   <p class="muted small" style="margin:8px 0 0">«Líneas en blanco al final»: súbalo si la impresora corta antes de terminar el mensaje de agradecimiento. En el cuadro de impresión del navegador deje <b>Márgenes: Ninguno</b>, <b>Escala: 100 %</b> y desactive «Encabezados y pies de página».</p>
   <div class="ft" style="justify-content:flex-start;margin-top:12px"><button class="btn pri" data-act="printTest">Imprimir ticket de prueba</button><button class="btn" data-act="printerReset">Restablecer (H-58B)</button></div></div>`}
@@ -1621,7 +1696,7 @@ const A={
   freeItemDo(){const n=$('#fi_n').value.trim().toUpperCase()||'ARTÍCULO VARIOS',pr=r2(num($('#fi_p').value)),q=Math.max(1,num($('#fi_q').value));if(pr<=0)return toast('Ingrese el precio.',1);
     if(!prod('p_libre'))S.products.push({id:'p_libre',code:'LIBRE',name:'ARTÍCULO VARIOS',line:'VARIOS',cost:0,p:[0,0,0,0],iva:false,track:false,stock:0,min:0,active:false,bulto:0,boxCode:'',supplier:''});
     S.cart.lines.push({pid:'p_libre',qty:q,price:pr,disc:0,manual:true,nm:n});save(true);closeModal();renderCart()},
-  rcptPrint(){printReceipt(rcpt)},printTest(){printReceipt(sampleSale())},printerReset(){['pPaper','pPrintable','pFont','pLogo','pDpi','pBold'].forEach(k=>delete S.cfg[k]);S.cfg.paper='pos58';S.cfg.feed=2;save(true);toast('Valores de la H-58B restablecidos.');vAjustes()},
+  rcptPrint(){printReceipt(rcpt)},printTest(){printReceipt(sampleSale())},printerReset(){['pPaper','pPrintable','pFont','pLogo','pDpi','pBold'].forEach(k=>delete S.cfg[k]);S.cfg.paper='pos58';S.cfg.feed=2;S.cfg.feedMm=25;save(true);toast('Valores de la H-58B restablecidos.');vAjustes()},
   impMap,impTemplate(){saveTable('plantilla-productos',[IMPHEAD,['','7861234567890','COLA 600ML','BEBIDAS',0.35,0.5,0.45,0.42,0.4,0.38,'NO','SI',24,5,'SI','',12,'7861234567999']],'Productos')},
   ui(el){S.cfg.ui=el.dataset.v;save(true);render()},
   ptype(el){S.cart.credit=el.dataset.v==='1';save();renderCart();if(S.cart.credit&&S.cart.customerId==='cf')toast('Para crédito elija el cliente.')},
@@ -1660,7 +1735,9 @@ const IN={tkLive:el=>{S.cfg.footer=el.value;save();refreshPrev()},crList,crDays,
 
 A.puPaste=puPaste;
 A.crPlazo=el=>{const d=+el.dataset.d,i=$('#cr_due');if(i)i.value=d?addDays(today(),d):'';$$('[data-act=crPlazo]').forEach(b=>b.classList.toggle('pri',b===el))};
-A.rcptImg=()=>{const n=waNum(($('#wa_num')||{}).value);return n?waImg(rcpt,n):shareTicketImg(rcpt)};
+A.rcptImg=()=>copyTicketImg(rcpt);A.proforma=makeProforma;A.genCode=()=>{const i=$('#e_code');if(i.value.trim()&&!confirm('Ya hay un código escrito. ¿Reemplazarlo por uno nuevo?'))return;i.value=nextInternalCode();toast('Código generado: '+i.value)};A.barLabel=barLabelOpen;A.barCopy=barCopy;A.barShare=barShare;A.closeBar=()=>{const o=document.getElementById('barov');if(o)o.remove()};A.pfList=pfList;A.pfImg=()=>copyTicketImg(curPf);A.pfPdf=()=>pfPdf(curPf);A.pfShare=()=>shareTicketImg(curPf);A.pfCart=el=>pfCart(el.dataset.id);
+A.pfOpen=el=>{const pf=pfLoad().items.find(x=>x.id===el.dataset.id);pf?showProforma(pf):toast('Esa proforma ya no está disponible.',1)};
+A.pfDel=el=>{const o=pfLoad();o.items=o.items.filter(x=>x.id!==el.dataset.id);pfSave(o);pfList()};
 A.bell=()=>{const p=$('#bellpop');if(p.hidden){bellDraw();p.hidden=false}else p.hidden=true};
 A.bellDo=el=>{const x=(window._nt||[])[+el.dataset.i];$('#bellpop').hidden=true;if(x&&x.a&&A[x.a])A[x.a]()};
 A.hrng=el=>{const k=el.dataset.k,t=today();H.auto=false;H.q='';H.t=t;H.f=k==='hoy'?t:k==='ayer'?(H.t=addDays(t,-1),addDays(t,-1)):k==='7'?addDays(t,-6):k==='mes'?t.slice(0,8)+'01':'2000-01-01';vHistorial()};
