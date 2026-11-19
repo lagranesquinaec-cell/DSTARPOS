@@ -709,6 +709,25 @@ body.pc .pc .pc-pay .pri{flex:none;width:100%;min-height:48px;font-size:18px;mar
 :root:not([data-fx=insta],[data-fx=nft],[data-fx=coin],[data-fx=fit],[data-fx=xp],[data-fx=brut]) body.pc nav a.on{background:var(--accent-soft);color:var(--accent)}
 :root:not([data-fx=insta],[data-fx=nft],[data-fx=coin],[data-fx=fit],[data-fx=xp],[data-fx=brut]) body.pc nav a.on svg{color:var(--accent)}
 :root:not([data-fx=insta],[data-fx=nft],[data-fx=coin],[data-fx=fit],[data-fx=xp],[data-fx=brut]) body.pc nav a.on::before{content:"";position:absolute;left:-10px;top:11px;bottom:11px;width:4px;border-radius:0 4px 4px 0;background:var(--accent)}
+/* ===== abrir caja ===== */
+.oc{max-width:480px;margin:18px auto;overflow:hidden;padding:0!important}
+.oc-hero{padding:24px 20px 18px;text-align:center;background:linear-gradient(160deg,var(--accent-soft),var(--surface) 80%);border-bottom:1px solid var(--line)}
+.oc-ic{width:70px;height:70px;margin:0 auto 12px;border-radius:22px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;box-shadow:0 12px 26px -12px var(--accent);animation:ocf 3.2s ease-in-out infinite}
+.oc-ic svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@keyframes ocf{50%{transform:translateY(-4px) rotate(-3deg)}}
+@media (prefers-reduced-motion:reduce){.oc-ic{animation:none}}
+.oc-hero h2{font-size:23px}.oc-hero p{margin:4px 0 0}
+.oc-body{padding:18px 20px 20px;display:grid;gap:18px}
+.oc-lab{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.oc-amt{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:var(--r2);padding:2px 16px;background:var(--bg)}
+.oc-amt:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.oc-amt b{font-family:var(--font-head);font-size:28px;color:var(--muted)}
+.oc-amt input{border:0!important;background:transparent!important;box-shadow:none!important;font-family:var(--font-head);font-size:36px;font-weight:700;min-height:60px;padding:4px 0}
+.oc-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.oc-chips button{flex:1 1 auto;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 14px;font-weight:700;min-height:38px}
+.oc-chips button:hover,.oc-chips button:active{background:var(--accent-soft);border-color:var(--accent)}
+.oc-last{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);background:var(--surface2);border-radius:var(--r1);padding:9px 12px}
+.oc-go{min-height:58px;font-size:18px;width:100%}
 </style>
 
 
@@ -922,6 +941,7 @@ function headState(){
   {const n=$('#netChip'),s=netState();n.className='chip '+(s==='on'?'ok':'warn');n.textContent=s==='on'?'● En línea':s==='off'?'Modo sin internet':'Sin conexión';n.title=s==='off'?'Toque para volver a usar internet':'Toque para trabajar sin internet'}
   const c=$('#cajaChip');if(S.caja){c.className='chip ok';c.textContent='Caja abierta · cerrar';c.dataset.act='cajaAsk'}else{c.className='chip warn';c.textContent='Caja cerrada';delete c.dataset.act}
   $('#uiSeg').innerHTML=[['pc','PC horizontal'],['movil','Móvil vertical']].map(([k,n])=>`<button data-act="ui" data-v="${k}" class="${curMode()===k?'on':''}">${n}</button>`).join('');
+  try{const q=$('#cloudChip'),m=SY.msg||'',on=!!S.cfg.syncUrl;q.className='chip '+(!on?'warn':m[0]==='✓'?'ok':m.startsWith('Error')?'bad':'');q.textContent=!on?'☁ Sin nube':m[0]==='✓'?'☁ '+m.slice(2):m.startsWith('Error')?'☁ Error':'☁ Nube'}catch(e){}
   $('#notice').innerHTML='';bellUpdate();
 
 }
@@ -963,8 +983,16 @@ function vVenta(){
    <aside class="side"><div class="panel" id="custPanel"></div>
    <div class="panel"><div class="tot" id="totals"></div><div class="acts" style="margin-top:12px"><button class="btn pri" data-act="pay">Cobrar (F2)</button><button class="btn" data-act="hold">En espera (F4)${S.held.length?' · '+S.held.length:''}</button><button class="btn" data-act="clearCart">Vaciar</button></div></div></aside></div>`;
   renderCust();renderCart();$('#q').focus()}
+function ocCard(p,act){
+  const h=new Date().getHours(),sal=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches',last=S.cajaHist[S.cajaHist.length-1],rs=recentSellers();
+  return `<div class="panel oc"><div class="oc-hero"><div class="oc-ic"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M6 9V5h12v4M7 13h4M15 13h2M7 16.5h10"/></svg></div><h2>${sal} 👋</h2><p class="muted">Cuente el efectivo del cajón y abra el turno.</p></div>
+  <div class="oc-body"><div><span class="oc-lab">Fondo inicial (efectivo)</span><div class="oc-amt"><b>$</b><input id="${p}_fondo" type="text" inputmode="decimal" autocomplete="off" value="0" onfocus="this.select()"></div>
+  <div class="oc-chips">${[0,20,50,100].map(v=>`<button type="button" data-act="ocAmt" data-p="${p}" data-v="${v}">$${v}</button>`).join('')}${last&&last.counted>0?`<button type="button" data-act="ocAmt" data-p="${p}" data-v="${last.counted}">Último: ${money(last.counted)}</button>`:''}</div></div>
+  <div><span class="oc-lab">Responsable</span><input id="${p}_who" value="${esc(S.cfg.cur||'')}" placeholder="Nombre de quien atiende" autocomplete="off">${rs.length?`<div class="oc-chips">${rs.map(n=>`<button type="button" data-act="ocWho" data-p="${p}" data-v="${esc(n)}">🧑‍💼 ${esc(n)}</button>`).join('')}</div>`:''}</div>
+  ${last?`<div class="oc-last"><span>Último cierre · ${fmtDT(last.closeTs)}</span><b>${money(last.counted)}</b></div>`:''}
+  <button class="btn pri oc-go" data-act="${act}">Abrir caja</button></div></div>`}
 function vAbrirCaja(){
-  $('#view').innerHTML=`<div class="panel" style="max-width:460px;margin:24px auto"><h2>Abrir caja</h2><p class="muted">Para empezar a vender, registre el efectivo con el que inicia el turno.</p><div style="display:grid;gap:12px"><label class="f">Fondo inicial (efectivo)<input id="m_fondo" type="text" value="0" inputmode="decimal"></label><label class="f">Responsable<input id="m_who" value="${esc(S.cfg.cur||'')}" placeholder="Nombre de quien atiende"></label><button class="btn pri" style="min-height:50px;font-size:17px" data-act="openCajaM">Abrir caja</button></div></div>`}
+  $('#view').innerHTML=ocCard('m','openCajaM')}
 const plOpts=()=>`<option value="-1" ${S.cart.list===-1?'selected':''}>Automático según cantidad</option><option value="-2" ${S.cart.list===-2?'selected':''}>⭐ Aliado: precio más bajo</option>`+S.cfg.listNames.map((n,i)=>`<option value="${i}" ${S.cart.list===i?'selected':''}>Siempre ${esc(n)}</option>`).join('');
 const typeSeg=()=>`<div class="seg"><button data-act="ptype" data-v="0" class="${S.cart.credit?'':'on'}">Contado</button><button data-act="ptype" data-v="1" class="${S.cart.credit?'on':''}">Crédito</button></div>`;
 const sellerSel=()=>`<div class="f"><span>Vende</span><button class="btn" data-act="sellerPick" style="display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;width:100%"><span style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--fg)">🧑‍💼 ${esc(S.cfg.cur||'— Sin asignar —')}</span><span class="muted">▾</span></button></div>`;
@@ -1565,7 +1593,7 @@ function cashStats(ses){
   const rc=S.sales.reduce((a,v)=>a+(v.status==='ok'?(v.rets||[]).filter(r=>r.sessionId===ses.id).reduce((b,r)=>b+r.cash,0):0),0);return {by,n,ab:r2(ab),ing:r2(ing),egr:r2(egr+rc),expected:r2(ses.fondo+by.efectivo+ab+ing-egr-rc)}}
 function vCaja(){
   const c=S.caja;let h='';
-  if(!c){h=`<div class="panel" style="max-width:460px"><h3>Abrir caja</h3><p class="muted">Registre el efectivo con el que inicia el turno.</p><div style="display:grid;gap:12px"><label class="f">Fondo inicial (efectivo)<input inputmode="decimal" autocomplete="off" id="o_fondo" type="text" value="0" autofocus></label><label class="f">Responsable<input id="o_who" placeholder="Nombre del cajero"></label><button class="btn pri" data-act="openCaja">Abrir caja</button></div></div>`}
+  if(!c){h=ocCard('o','openCaja')}
   else{const st=cashStats(c);h=`<div class="tiles"><div class="tile-s"><span>Abierta desde</span><b style="font-size:16px">${fmtDT(c.ts)}</b></div><div class="tile-s"><span>Fondo inicial</span><b class="money">${money(c.fondo)}</b></div><div class="tile-s"><span>Ventas (${st.n})</span><b class="money">${money(Object.values(st.by).reduce((a,b)=>a+b,0)-st.by.efectivo+st.by.efectivo)}</b></div><div class="tile-s"><span>Efectivo esperado</span><b class="money">${money(st.expected)}</b></div></div>
    <div class="two"><div class="panel"><h3 style="margin-bottom:8px">Resumen del turno</h3><table><tbody>${Object.entries(st.by).map(([k,v])=>`<tr><td>${PAY[k].n}</td><td class="r money">${money(v)}</td></tr>`).join('')}<tr><td>Abonos en efectivo</td><td class="r money">${money(st.ab)}</td></tr><tr><td>Ingresos manuales</td><td class="r money">${money(st.ing)}</td></tr><tr><td>Egresos / gastos</td><td class="r money">-${money(st.egr)}</td></tr></tbody></table><div class="ft" style="margin-top:12px"><button class="btn" data-act="cashMove" data-t="ingreso">Ingreso de efectivo</button><button class="btn" data-act="cashMove" data-t="egreso">Retiro / gasto</button></div></div>
    <div class="panel"><h3 style="margin-bottom:8px">Movimientos manuales</h3>${(c.moves||[]).length?`<table><tbody>${c.moves.map(m=>`<tr><td>${fmtDT(m.ts)}</td><td>${esc(m.reason)}</td><td class="r money">${m.type==='egreso'?'-':'+'}${money(m.amt)}</td></tr>`).join('')}</tbody></table>`:'<div class="muted">Sin movimientos. Registre aquí gastos como transporte o compras menores.</div>'}</div></div>
@@ -1763,11 +1791,12 @@ function sApply(k,x){
   if(lh===hsh(d,sk)){sy.h[key]=lh;return 0}
   if(sy.started&&sy.h[key]!==lh&&(l._u||0)>(x.u||0))return 0;
   if(sk)d.stock=l.stock;arr[i]=d;sy.h[key]=hsh(d,sk);return 1}
+function sFetch(u,o){const c=new AbortController(),t=setTimeout(()=>c.abort(),20000);return fetch(u,{...o,signal:c.signal}).finally(()=>clearTimeout(t))}
 async function sPull(){
   const sy=S.sync;let ch=0,n=0;
   for(;;){
     const q=sy.cur?'&srv=gte.'+encodeURIComponent(sy.cur):'';
-    const r=await fetch(S.cfg.syncUrl+'/rest/v1/records?select=id,kind,data,u,srv&order=srv.asc&limit=1000&kind=neq.snap'+q,{headers:sHdr()});
+    const r=await sFetch(S.cfg.syncUrl+'/rest/v1/records?select=id,kind,data,u,srv&order=srv.asc&limit=1000&kind=neq.snap'+q,{headers:sHdr()});
     if(!r.ok)throw new Error('descarga '+r.status);
     const rows=await r.json();n+=rows.length;
     for(const k of SK)for(const x of rows)if(x.kind===k)ch+=sApply(k,x);
@@ -1782,7 +1811,7 @@ async function sPush(){
   for(const key in (sy.del||{})){if(sy.h[key]==='del')continue;const p=key.indexOf(':'),k=key.slice(0,p),id=key.slice(p+1);out.push({key,h:'del',row:{id:key,kind:k,data:{id,_del:1},u:sy.del[key],dev:DEV}})}
   const sh=hsh([S.sellers,S.cfg.pins||{}]);if(sy.h['sellers:all']!==sh)out.push({key:'sellers:all',h:sh,row:{id:'sellers:all',kind:'sellers',data:{list:S.sellers,pins:S.cfg.pins||{}},u:Date.now(),dev:DEV}});
   for(let i=0;i<out.length;i+=25){const c=out.slice(i,i+25);
-    const r=await fetch(S.cfg.syncUrl+'/rest/v1/records?on_conflict=id',{method:'POST',headers:{...sHdr(),Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(c.map(x=>x.row))});
+    const r=await sFetch(S.cfg.syncUrl+'/rest/v1/records?on_conflict=id',{method:'POST',headers:{...sHdr(),Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(c.map(x=>x.row))});
     if(!r.ok)throw new Error('envío '+r.status);
     c.forEach(x=>sy.h[x.key]=x.h)}
   return out.length}
@@ -1805,7 +1834,7 @@ async function runSync(manual){
   save(true);SY.busy=false;headState();
   if(res){if(res.ch&&$('#modal').hidden)render();if(manual)toast('Sincronizado ✓')}}
 function schedSync(){if(SY.busy||!S.cfg.syncUrl)return;clearTimeout(SY.t);SY.t=setTimeout(()=>runSync(),3000)}
-setInterval(()=>runSync(),30000);window.addEventListener('online',()=>runSync());
+setInterval(()=>runSync(),30000);window.addEventListener('online',()=>runSync());document.addEventListener('visibilitychange',()=>{if(!document.hidden)runSync()});
 A.cloudOpen=()=>modal(`${dlgHead('Sincronización en la nube')}<p class="muted small" style="margin:0 0 8px">${esc(SY.msg||'Aún sin sincronizar.')} · Equipo: <b>${DEV}</b> · Punto de emisión: <b>${esc(S.cfg.pto)}</b> (debe ser distinto en cada equipo)</p><label class="f">URL del proyecto<input id="sy_u" value="${esc(S.cfg.syncUrl||'')}" placeholder="https://xxxx.supabase.co" autocomplete="off"></label><label class="f">Clave pública (anon public)<input id="sy_k" value="${esc(S.cfg.syncKey||'')}" autocomplete="off"></label><div class="ft"><button class="btn" data-act="closeModal">Cerrar</button><button class="btn pri" data-act="cloudSave">Guardar y sincronizar</button></div>`);
 A.cloudSave=()=>{S.cfg.syncUrl=$('#sy_u').value.trim().replace(/\/+$/,'');S.cfg.syncKey=$('#sy_k').value.trim();save(true);closeModal();runSync(true)};
 /* ===================== CRÉDITOS ===================== */
@@ -1884,6 +1913,8 @@ Object.assign(A,{
   crPhoto(el){const s=S.sales.find(x=>x.id===el.dataset.s),a=s&&s.abonos[+el.dataset.i];if(!a)return;modal(`${dlgHead('Comprobante')}<img src="${a.photo}" style="max-width:100%;border-radius:8px"><div class="ft"><button class="btn pri" data-act="crOpen" data-id="${s.customerId}">Volver</button></div>`)},
   crClean(el){const s=S.sales.find(x=>x.id===el.dataset.s);if(!s)return;confirmBox('Se borran las fotos de este crédito para ahorrar espacio. El crédito y sus abonos se conservan.',()=>{crCleanSale(s);save(true);toast('Fotos quitadas.');crDetail(s.customerId)},'Quitar fotos',1)},
   crCleanAll(){const L=S.sales.filter(s=>s.credit&&s.balance<=0&&(s.abonos||[]).some(a=>a.photo));if(!L.length)return toast('No hay fotos en créditos pagados.');confirmBox('Se borran las fotos de '+L.length+' crédito(s) ya pagados para ahorrar espacio. Los créditos y abonos se conservan.',()=>{L.forEach(crCleanSale);save(true);closeModal();toast('Listo, espacio liberado.')},'Quitar fotos',1)}});
+A.ocAmt=el=>{const i=$('#'+el.dataset.p+'_fondo');i.value=el.dataset.v;i.focus()};
+A.ocWho=el=>{$('#'+el.dataset.p+'_who').value=el.dataset.v};
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=A[el.dataset.act];if(f){e.preventDefault();f(el,e)}});
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.chg&&CH[el.dataset.chg]){CH[el.dataset.chg](el);return}
