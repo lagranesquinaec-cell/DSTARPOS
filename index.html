@@ -749,6 +749,7 @@ tbody tr{transition:background-color .12s}
 .bellbtn:hover{animation:ring .6s ease}
 @keyframes ring{20%{transform:rotate(14deg)}40%{transform:rotate(-12deg)}60%{transform:rotate(8deg)}80%{transform:rotate(-4deg)}}
 }
+@keyframes spin{to{transform:rotate(360deg)}}.spin{display:inline-block;animation:spin .9s linear infinite}
 </style>
 
 
@@ -759,6 +760,7 @@ tbody tr{transition:background-color .12s}
     <div class="brand"><img id="logo" alt="" width="34" height="34" style="border-radius:8px"><span id="bname">Distribuidora Star</span></div>
     <button id="netChip" class="chip" type="button" data-act="netToggle"></button>
     <button id="cloudChip" class="chip" type="button" data-act="cloudOpen">☁ Nube</button>
+    <button id="syncBtn" class="chip" type="button" data-act="syncNow" title="Sincronizar ahora"><span id="syncIc">🔄</span> Sincronizar</button>
     <button id="bell" class="bellbtn" type="button" data-act="bell" aria-label="Avisos">🔔<i class="dot" id="bellDot"></i></button><button id="cajaChip" class="chip" type="button">Caja</button>
     <span class="muted small" id="clock"></span>
     <button class="btn sm" id="menuBtn" data-act="menu">☰ Menú</button><div class="seg" id="uiSeg" style="margin-left:auto" role="group" aria-label="Versión de pantalla"></div>
@@ -962,6 +964,7 @@ function headState(){
   {const n=$('#netChip'),s=netState();n.className='chip '+(s==='on'?'ok':'warn');n.textContent=s==='on'?'● En línea':s==='off'?'Modo sin internet':'Sin conexión';n.title=s==='off'?'Toque para volver a usar internet':'Toque para trabajar sin internet'}
   const c=$('#cajaChip');if(S.caja){c.className='chip ok';c.textContent='Caja abierta · cerrar';c.dataset.act='cajaAsk'}else{c.className='chip warn';c.textContent='Caja cerrada';delete c.dataset.act}
   $('#uiSeg').innerHTML=[['pc','PC horizontal'],['movil','Móvil vertical']].map(([k,n])=>`<button data-act="ui" data-v="${k}" class="${curMode()===k?'on':''}">${n}</button>`).join('');
+  try{const ic=$('#syncIc');ic&&ic.classList.toggle('spin',!!SY.busy)}catch(e){}
   try{const q=$('#cloudChip'),m=SY.msg||'',on=!!S.cfg.syncUrl;q.className='chip '+(!on?'warn':m[0]==='✓'?'ok':m.startsWith('Error')?'bad':'');q.textContent=!on?'☁ Sin nube':m[0]==='✓'?'☁ '+m.slice(2):m.startsWith('Error')?'☁ Error':'☁ Nube'}catch(e){}
   $('#notice').innerHTML='';bellUpdate();
 
@@ -1017,7 +1020,7 @@ function vAbrirCaja(){
 const plOpts=()=>`<option value="-1" ${S.cart.list===-1?'selected':''}>Automático según cantidad</option><option value="-2" ${S.cart.list===-2?'selected':''}>⭐ Aliado: precio más bajo</option>`+S.cfg.listNames.map((n,i)=>`<option value="${i}" ${S.cart.list===i?'selected':''}>Siempre ${esc(n)}</option>`).join('');
 const typeSeg=()=>`<div class="seg"><button data-act="ptype" data-v="0" class="${S.cart.credit?'':'on'}">Contado</button><button data-act="ptype" data-v="1" class="${S.cart.credit?'on':''}">Crédito</button></div>`;
 const sellerSel=()=>`<div class="f"><span>Vende</span><button class="btn" data-act="sellerPick" style="display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;width:100%"><span style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--fg)">🧑‍💼 ${esc(S.cfg.cur||'— Sin asignar —')}</span><span class="muted">▾</span></button></div>`;
-function addSeller(n){n=(n||'').trim();if(!n)return;const ex=S.sellers.find(x=>x.toLowerCase()===n.toLowerCase());if(ex)n=ex;else S.sellers.push(n);S.cfg.cur=n;S.cfg.recentSellers=[n,...(S.cfg.recentSellers||[]).filter(x=>x!==n)].slice(0,5)}
+function addSeller(n){n=(n||'').trim();if(!n)return;const ex=S.sellers.find(x=>x.toLowerCase()===n.toLowerCase());if(ex)n=ex;else{S.sellers.push(n);(S.cfg.sellMeta=S.cfg.sellMeta||{})[n]={t:Date.now(),d:0}}S.cfg.cur=n;S.cfg.recentSellers=[n,...(S.cfg.recentSellers||[]).filter(x=>x!==n)].slice(0,5)}
 function recentSellers(){const r=(S.cfg.recentSellers||[]).filter(x=>S.sellers.includes(x));return r.length?r.slice(0,5):S.sellers.slice(-5).reverse()}
 const nrm=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function sellerRow(n){return `<div class="payrow" style="grid-template-columns:1fr auto;gap:6px"><button class="btn" style="text-align:left;${S.cfg.cur===n?'border-color:var(--accent);background:var(--accent-soft)':''}" data-act="sellerUse" data-n="${esc(n)}">🧑‍💼 ${esc(n)}${S.cfg.cur===n?' ✓':''}</button><button class="btn sm bad" data-act="sellerDel" data-n="${esc(n)}" aria-label="Borrar ${esc(n)}" title="Borrar de la lista">✕</button></div>`}
@@ -1703,7 +1706,7 @@ const A={
   sellerPick:sellerModal,
   sellerUse(el){const n=el.dataset.n;S.cfg.cur=n;if(n)S.cfg.recentSellers=[n,...(S.cfg.recentSellers||[]).filter(x=>x!==n)].slice(0,5);save(true);closeModal();render()},
   sellerNew(el){const n=el.dataset.n.trim();if(!n)return;addSeller(n);save(true);closeModal();render();toast('Vendedor creado: '+S.cfg.cur)},
-  sellerDel(el){const n=el.dataset.n;confirmBox(`¿Borrar a <b>${esc(n)}</b> de la lista de vendedores? Las ventas ya hechas conservan su nombre.`,()=>{S.sellers=S.sellers.filter(x=>x!==n);S.cfg.recentSellers=(S.cfg.recentSellers||[]).filter(x=>x!==n);if(S.cfg.cur===n)S.cfg.cur='';save(true);render();sellerModal()},'Borrar',1)},
+  sellerDel(el){const n=el.dataset.n;confirmBox(`¿Borrar a <b>${esc(n)}</b> de la lista de vendedores? Las ventas ya hechas conservan su nombre.`,()=>{S.sellers=S.sellers.filter(x=>x!==n);(S.cfg.sellMeta=S.cfg.sellMeta||{})[n]={t:Date.now(),d:1};S.cfg.recentSellers=(S.cfg.recentSellers||[]).filter(x=>x!==n);if(S.cfg.cur===n)S.cfg.cur='';save(true);render();sellerModal()},'Borrar',1)},
 
   closeModal,confirmYes(){const f=confirmCb;confirmCb=null;closeModal();f&&f()},
   copyFb(){const t=$('#fb');t.select();try{navigator.clipboard.writeText(t.value).then(()=>toast('Copiado'),()=>document.execCommand('copy'))}catch(e){document.execCommand('copy')}},
@@ -1818,6 +1821,14 @@ function sApply(k,x){
   if(sy.started&&sy.h[key]!==lh&&(l._u||0)>(x.u||0))return 0;
   if(sk)d.stock=l.stock;arr[i]=d;sy.h[key]=hsh(d,sk);return 1}
 function sFetch(u,o){const c=new AbortController(),t=setTimeout(()=>c.abort(),20000);return fetch(u,{...o,signal:c.signal}).finally(()=>clearTimeout(t))}
+function sRows(rows){const sy=S.sync;let ch=0;
+    for(const k of SK)for(const x of rows)if(x.kind===k)ch+=sApply(k,x);
+    for(const x of rows)if(x.kind==='sellers'){const M=S.cfg.sellMeta=S.cfg.sellMeta||{},rm=x.data.meta||{};
+      for(const n of x.data.list||[])if(!S.sellers.includes(n)&&!(M[n]&&M[n].d)){S.sellers.push(n);ch++}
+      for(const n in rm){const l=M[n],r=rm[n];if(l&&l.t>=r.t)continue;M[n]=r;const i=S.sellers.indexOf(n);
+        if(r.d){if(i>=0){S.sellers.splice(i,1);S.cfg.recentSellers=(S.cfg.recentSellers||[]).filter(y=>y!==n);if(S.cfg.cur===n)S.cfg.cur='';ch++}}else if(i<0){S.sellers.push(n);ch++}}
+      if(x.data.pins)S.cfg.pins=Object.assign({},S.cfg.pins,x.data.pins);sy.h['sellers:all']=hsh([S.sellers,S.cfg.pins||{},M])}
+  return ch}
 async function sPull(){
   const sy=S.sync;let ch=0,n=0;
   for(;;){
@@ -1825,17 +1836,19 @@ async function sPull(){
     const r=await sFetch(S.cfg.syncUrl+'/rest/v1/records?select=id,kind,data,u,srv&order=srv.asc&limit=1000&kind=neq.snap'+q,{headers:sHdr()});
     if(!r.ok)throw new Error('descarga '+r.status);
     const rows=await r.json();n+=rows.length;
-    for(const k of SK)for(const x of rows)if(x.kind===k)ch+=sApply(k,x);
-    for(const x of rows)if(x.kind==='sellers'){for(const s of x.data.list)if(!S.sellers.includes(s)){S.sellers.push(s);ch++}if(x.data.pins)S.cfg.pins=Object.assign({},S.cfg.pins,x.data.pins);sy.h['sellers:all']=hsh([S.sellers,S.cfg.pins||{}])}
+    ch+=sRows(rows);
     const same=rows.length&&rows[rows.length-1].srv===sy.cur;
     if(rows.length)sy.cur=rows[rows.length-1].srv;
     if(rows.length<1000||same)break}
+  if(sy.started&&sy.ok){const since=Math.max(0,sy.ok-18e5);
+    for(let off=0;;off+=1000){const r=await sFetch(S.cfg.syncUrl+'/rest/v1/records?select=id,kind,data,u,srv&kind=neq.snap&u=gte.'+since+'&order=u.asc,id.asc&limit=1000&offset='+off,{headers:sHdr()});
+      if(!r.ok)throw new Error('descarga '+r.status);const rows=await r.json();ch+=sRows(rows);if(rows.length<1000)break}}
   return {ch,n}}
 async function sPush(){
   const sy=S.sync,out=[];
   for(const k of SK)for(const o of S[k]){const key=k+':'+o.id,h=hsh(o,k==='products');if(sy.h[key]!==h)out.push({key,h,row:{id:key,kind:k,data:o,u:o._u||o.ts||0,dev:DEV}})}
   for(const key in (sy.del||{})){if(sy.h[key]==='del')continue;const p=key.indexOf(':'),k=key.slice(0,p),id=key.slice(p+1);out.push({key,h:'del',row:{id:key,kind:k,data:{id,_del:1},u:sy.del[key],dev:DEV}})}
-  const sh=hsh([S.sellers,S.cfg.pins||{}]);if(sy.h['sellers:all']!==sh)out.push({key:'sellers:all',h:sh,row:{id:'sellers:all',kind:'sellers',data:{list:S.sellers,pins:S.cfg.pins||{}},u:Date.now(),dev:DEV}});
+  const sh=hsh([S.sellers,S.cfg.pins||{},S.cfg.sellMeta||{}]);if(sy.h['sellers:all']!==sh)out.push({key:'sellers:all',h:sh,row:{id:'sellers:all',kind:'sellers',data:{list:S.sellers,pins:S.cfg.pins||{},meta:S.cfg.sellMeta||{}},u:Date.now(),dev:DEV}});
   for(let i=0;i<out.length;i+=25){const c=out.slice(i,i+25);
     const r=await sFetch(S.cfg.syncUrl+'/rest/v1/records?on_conflict=id',{method:'POST',headers:{...sHdr(),Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(c.map(x=>x.row))});
     if(!r.ok)throw new Error('envío '+r.status);
@@ -1849,19 +1862,23 @@ async function runSync(manual){
   try{
     S.sync=S.sync||{h:{},cur:null,started:false};const sy=S.sync;
     if(sy.started)sStamp();else for(const m of S.moves)sy.h['moves:'+m.id]=hsh(m);
-    const {ch,n}=await sPull();
+    const t0=Date.now(),{ch,n}=await sPull();
     if(!sy.started){
       if(!n)for(const p of S.products)if(p.track&&p.stock)S.moves.push({id:uid(),ts:Date.now(),pid:p.id,name:p.name,type:'ajuste',qty:p.stock,ref:'Saldo al sincronizar'});
       sy.started=true}
     sStamp();const sent=await sPush();if(S.cfg.lastSnap!==today())snapPush();
-    SY.msg='✓ '+new Date().toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+    sy.ok=t0;SY.msg='✓ '+new Date().toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
     res={ch,sent}}
   catch(e){SY.msg='Error: '+e.message;if(manual)toast('No se pudo sincronizar ('+e.message+')',1)}
   save(true);SY.busy=false;headState();
   if(res){if(res.ch&&$('#modal').hidden)render();if(manual)toast('Sincronizado ✓')}}
-function schedSync(){if(SY.busy||!S.cfg.syncUrl)return;clearTimeout(SY.t);SY.t=setTimeout(()=>runSync(),3000)}
-setInterval(()=>runSync(),30000);window.addEventListener('online',()=>runSync());document.addEventListener('visibilitychange',()=>{if(!document.hidden)runSync()});
-A.cloudOpen=()=>modal(`${dlgHead('Sincronización en la nube')}<p class="muted small" style="margin:0 0 8px">${esc(SY.msg||'Aún sin sincronizar.')} · Equipo: <b>${DEV}</b> · Punto de emisión: <b>${esc(S.cfg.pto)}</b> (debe ser distinto en cada equipo)</p><label class="f">URL del proyecto<input id="sy_u" value="${esc(S.cfg.syncUrl||'')}" placeholder="https://xxxx.supabase.co" autocomplete="off"></label><label class="f">Clave pública (anon public)<input id="sy_k" value="${esc(S.cfg.syncKey||'')}" autocomplete="off"></label><div class="ft"><button class="btn" data-act="closeModal">Cerrar</button><button class="btn pri" data-act="cloudSave">Guardar y sincronizar</button></div>`);
+function schedSync(){if(SY.busy||!S.cfg.syncUrl)return;clearTimeout(SY.t);SY.t=setTimeout(()=>runSync(),1500)}
+setInterval(()=>runSync(),20000);window.addEventListener('online',()=>runSync());document.addEventListener('visibilitychange',()=>{if(!document.hidden)runSync()});
+A.cloudOpen=()=>modal(`${dlgHead('Sincronización en la nube')}<p class="muted small" style="margin:0 0 8px">${esc(SY.msg||'Aún sin sincronizar.')} · Equipo: <b>${DEV}</b> · Punto de emisión: <b>${esc(S.cfg.pto)}</b> (debe ser distinto en cada equipo)</p><label class="f">URL del proyecto<input id="sy_u" value="${esc(S.cfg.syncUrl||'')}" placeholder="https://xxxx.supabase.co" autocomplete="off"></label><label class="f">Clave pública (anon public)<input id="sy_k" value="${esc(S.cfg.syncKey||'')}" autocomplete="off"></label><label class="f">Código de conexión (para configurar otro equipo)<input id="sy_c" placeholder="Pegue aquí el código copiado de otro equipo" autocomplete="off"></label><div class="ft" style="justify-content:flex-start"><button class="btn sm" data-act="cloudCopy">Copiar mi código</button><button class="btn sm" data-act="cloudCode">Usar código pegado</button></div><div class="ft"><button class="btn" data-act="closeModal">Cerrar</button><button class="btn" data-act="cloudFull">Descargar todo de nuevo</button><button class="btn pri" data-act="cloudSave">Guardar y sincronizar</button></div>`);
+A.syncNow=()=>runSync(true);
+A.cloudCopy=async()=>{if(!S.cfg.syncUrl||!S.cfg.syncKey)return toast('Primero configure la nube en este equipo.',1);try{await navigator.clipboard.writeText(btoa(JSON.stringify({u:S.cfg.syncUrl,k:S.cfg.syncKey})));toast('Código copiado. Péguelo en el otro equipo.')}catch(e){toast('No se pudo copiar.',1)}};
+A.cloudCode=()=>{try{const o=JSON.parse(atob($('#sy_c').value.trim()));if(!o.u||!o.k)throw 0;$('#sy_u').value=o.u;$('#sy_k').value=o.k;toast('Código listo. Toque «Guardar y sincronizar».')}catch(e){toast('Ese código no es válido.',1)}};
+A.cloudFull=()=>{const sy=S.sync=S.sync||{h:{},cur:null,started:false};sy.cur=null;sy.ok=0;save(true);closeModal();runSync(true)};
 A.cloudSave=()=>{S.cfg.syncUrl=$('#sy_u').value.trim().replace(/\/+$/,'');S.cfg.syncKey=$('#sy_k').value.trim();save(true);closeModal();runSync(true)};
 /* ===================== CRÉDITOS ===================== */
 var CR={f:'open',q:'',photo:'',from:''};
