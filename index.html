@@ -728,6 +728,27 @@ body.pc .pc .pc-pay .pri{flex:none;width:100%;min-height:48px;font-size:18px;mar
 .oc-chips button:hover,.oc-chips button:active{background:var(--accent-soft);border-color:var(--accent)}
 .oc-last{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);background:var(--surface2);border-radius:var(--r1);padding:9px 12px}
 .oc-go{min-height:58px;font-size:18px;width:100%}
+/* ===== detalles con movimiento (suaves) ===== */
+@media(prefers-reduced-motion:no-preference){
+.tiles>.tile-s{animation:rise .4s cubic-bezier(.2,.7,.3,1) both}
+.tiles>.tile-s:nth-child(2){animation-delay:.05s}.tiles>.tile-s:nth-child(3){animation-delay:.1s}.tiles>.tile-s:nth-child(4){animation-delay:.15s}.tiles>.tile-s:nth-child(n+5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.dlg{animation:pop .22s cubic-bezier(.2,.8,.3,1.1)}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}}
+#bellpop:not([hidden]){animation:tin .18s ease-out}
+.tile-s,.panel{transition:transform .18s ease,box-shadow .18s ease}
+.tile-s:hover{transform:translateY(-2px)}
+.btn.pri{transition:transform .12s ease,filter .15s,box-shadow .2s}
+.btn.pri:hover{transform:translateY(-1px);box-shadow:0 8px 18px -10px var(--accent)}
+.btn.pri:active{transform:translateY(1px) scale(.99)}
+nav a{transition:color .15s,border-color .2s}
+nav a svg{transition:transform .2s ease}nav a:hover svg{transform:translateY(-1px) scale(1.08)}
+tbody tr{transition:background-color .12s}
+.chip.warn#cajaChip{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--warn) 18%,transparent)}}
+.bellbtn:hover{animation:ring .6s ease}
+@keyframes ring{20%{transform:rotate(14deg)}40%{transform:rotate(-12deg)}60%{transform:rotate(8deg)}80%{transform:rotate(-4deg)}}
+}
 </style>
 
 
@@ -984,7 +1005,7 @@ function vVenta(){
    <div class="panel"><div class="tot" id="totals"></div><div class="acts" style="margin-top:12px"><button class="btn pri" data-act="pay">Cobrar (F2)</button><button class="btn" data-act="hold">En espera (F4)${S.held.length?' · '+S.held.length:''}</button><button class="btn" data-act="clearCart">Vaciar</button></div></div></aside></div>`;
   renderCust();renderCart();$('#q').focus()}
 function ocCard(p,act){
-  const h=new Date().getHours(),sal=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches',last=S.cajaHist[S.cajaHist.length-1],rs=recentSellers();
+  const h=new Date().getHours(),sal=greet(),last=S.cajaHist[S.cajaHist.length-1],rs=recentSellers();
   return `<div class="panel oc"><div class="oc-hero"><div class="oc-ic"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M6 9V5h12v4M7 13h4M15 13h2M7 16.5h10"/></svg></div><h2>${sal} 👋</h2><p class="muted">Cuente el efectivo del cajón y abra el turno.</p></div>
   <div class="oc-body"><div><span class="oc-lab">Fondo inicial (efectivo)</span><div class="oc-amt"><b>$</b><input id="${p}_fondo" type="text" inputmode="decimal" autocomplete="off" value="0" onfocus="this.select()"></div>
   <div class="oc-chips">${[0,20,50,100].map(v=>`<button type="button" data-act="ocAmt" data-p="${p}" data-v="${v}">$${v}</button>`).join('')}${last&&last.counted>0?`<button type="button" data-act="ocAmt" data-p="${p}" data-v="${last.counted}">Último: ${money(last.counted)}</button>`:''}</div></div>
@@ -1193,9 +1214,14 @@ function crDo(){
   finishSale(ab>0?[{m:'efectivo',amt:ab}]:[],0,r2(T.total-ab),$('#cr_due').value)}
 
 /* ---- comprobante ---- */
-const TK_OPTS=[['name','Nombre del negocio'],['ruc','RUC'],['addr','Dirección'],['tel','Teléfono'],['date','Fecha y hora'],['custName','Nombre del cliente'],['custIdent','Cédula / RUC del cliente'],['seller','Vendedor'],['unitPrice','Precio unitario de cada producto'],['subtotals','Subtotales e IVA desglosado'],['payments','Formas de pago y cambio'],['footer','Mensaje de agradecimiento'],['legal','Leyenda de validez tributaria']];
+const TK_OPTS=[['name','Nombre del negocio'],['ruc','RUC'],['addr','Dirección'],['tel','Teléfono'],['date','Fecha y hora'],['custName','Nombre del cliente'],['custIdent','Cédula / RUC del cliente'],['seller','Vendedor'],['unitPrice','Precio unitario de cada producto'],['subtotals','Subtotales e IVA desglosado'],['payments','Formas de pago y cambio'],['greet','Saludo según la hora (buenos días / tardes / noches)'],['footer','Mensaje de agradecimiento'],['legal','Leyenda de validez tributaria']];
 const LEGAL_DEF='Este ticket no tiene validez tributaria, puede solicitar una nota de venta en caja.';
 const tk=k=>(S.cfg.tk||{})[k]!==false;
+function dayPart(ts){const h=+new Intl.DateTimeFormat('en-US',{hour:'numeric',hourCycle:'h23',timeZone:TZ}).format(ts||Date.now());return h<12?0:h<19?1:2}
+const greet=ts=>['Buenos días','Buenas tardes','Buenas noches'][dayPart(ts)];
+const bye=ts=>['¡Que tenga un excelente día!','¡Que tenga una excelente tarde!','¡Que tenga una excelente noche!'][dayPart(ts)];
+const firstName=n=>{n=String(n||'').trim().split(/\s+/)[0]||'';return /^consumidor/i.test(n)?'':n.toLowerCase().replace(/^./,x=>x.toUpperCase())};
+const ftxt=s=>[tk('footer')&&S.cfg.footer?S.cfg.footer:'',tk('greet')?bye(s&&s.ts):''].filter(Boolean).join('\n');
 const legalTxt=()=>(S.cfg.legal||'').trim()||LEGAL_DEF;
 function prn(fmt){const c=S.cfg,p80=(fmt||c.paper)==='pos80',g=(k,d)=>{const v=num(c[k]);return v>0?v:d},paper=g('pPaper',p80?80:58);
   return {paper,iw:Math.min(paper,g('pPrintable',p80?72:48)),fs:g('pFont',p80?13:12),bold:c.pBold!==false,logo:g('pLogo',24),dpi:g('pDpi',203),feed:Math.min(12,Math.max(0,Math.round(num(c.feed??2)))),feedMm:Math.min(80,Math.max(0,num(c.feedMm??25)))}}
@@ -1208,7 +1234,7 @@ function receiptHTML(s){
   <table><tr><th>Cant</th><th>Descripción</th><th class="r">Total</th></tr>${s.lines.map(l=>`<tr><td>${l.qty}</td><td>${esc(l.name)}${tk('unitPrice')?`<br>@ ${money(l.price)}${l.disc?` (-${l.disc}%)`:''}`:''}</td><td class="r">${money(l.tot)}</td></tr>`).join('')}</table><hr>
   <table>${tk('subtotals')&&s.subIva>0?`<tr><td>Subtotal 0%</td><td class="r">${money(s.sub0)}</td></tr><tr><td>Subtotal ${s.ivaRate}%</td><td class="r">${money(s.subIva)}</td></tr>`:''}${s.disc>0?`<tr><td>Descuento</td><td class="r">${money(s.disc)}</td></tr>`:''}${tk('subtotals')&&s.subIva>0?`<tr><td>IVA ${s.ivaRate}%</td><td class="r">${money(s.iva)}</td></tr>`:''}<tr><td><b>TOTAL</b></td><td class="r"><b>${money(s.total)}</b></td></tr></table>
   ${tk('payments')||s.balance>0?`<hr><table>${tk('payments')?pay+(s.change>0?`<tr><td>Cambio</td><td class="r">${money(s.change)}</td></tr>`:''):''}${s.balance>0?`<tr><td>Saldo por cobrar</td><td class="r">${money(s.balance)}</td></tr>`:''}${s.balance>0&&s.due?`<tr><td>Vence</td><td class="r">${esc(s.due)}</td></tr>`:''}</table>`:''}
-  ${tk('footer')&&c.footer||tk('legal')?`<hr><div class="c">${tk('footer')&&c.footer?esc(c.footer).replace(/\n/g,'<br>'):''}${tk('footer')&&c.footer&&tk('legal')?'<br>':''}${tk('legal')?`<small>${esc(legalTxt())}</small>`:''}</div>`:''}`}
+  ${ftxt(s)||tk('legal')?`<hr><div class="c">${ftxt(s)?esc(ftxt(s)).replace(/\n/g,'<br>'):''}${ftxt(s)&&tk('legal')?'<br>':''}${tk('legal')?`<small>${esc(legalTxt())}</small>`:''}</div>`:''}`}
 function receiptText(s){
   const w=36,L=[];const c=(t)=>t.padStart(Math.floor((w+t.length)/2));const two=(a,b)=>a+' '.repeat(Math.max(1,w-a.length-b.length))+b;const C=S.cfg;
   const wrap=t=>{const o=[];let l='';for(const p of String(t).split(' ')){if((l+' '+p).trim().length>w){o.push(c(l.trim()));l=p}else l=(l+' '+p).trim()}if(l)o.push(c(l));return o};
@@ -1221,7 +1247,7 @@ function receiptText(s){
   if(tk('footer')&&C.footer){L.push('');String(C.footer).split(/\n/).forEach(x=>L.push(c(x.trim())))}if(tk('legal'))L.push('',...wrap(legalTxt()));return L.filter(x=>x!=='').join('\n')}
 const PAYE={efectivo:'💵',transferencia:'🏦',tarjeta:'💳',qr:'📱',credito:'📒'};
 function waText(s){
-  const C=S.cfg,L=[],bar='━━━━━━━━━━━━━━━';
+  const C=S.cfg,L=[],bar='━━━━━━━━━━━━━━━',G=tk('greet')?[`*${greet()}${firstName(s.custName)?', '+firstName(s.custName):''}* 👋`,'']:[];
   if(tk('name'))L.push(`🏪 *${C.name}*`);
   if(tk('ruc')&&C.ruc)L.push(`🧾 RUC: ${C.ruc}`);if(tk('addr')&&C.addr)L.push(`📍 ${C.addr}`);if(tk('tel')&&C.tel)L.push(`📞 ${C.tel}`);
   if(L.length)L.push(bar);
@@ -1237,7 +1263,7 @@ function waText(s){
   if(s.balance>0){L.push('',`⏳ *Saldo por cobrar: ${money(s.balance)}*`);if(s.due)L.push(`📆 Vence: ${s.due}`)}
   if(tk('footer')&&C.footer)L.push('',`🙏 ${C.footer}`);
   if(tk('legal'))L.push('',`_${legalTxt()}_`);
-  return L.join('\n')}
+  return G.concat(L).join('\n')}
 const paperOpts=()=>[['pos58','POS 58 mm'],['pos80','POS 80 mm'],['a4','A4']].map(([k,n])=>`<option value="${k}" ${(S.cfg.paper||'pos58')===k?'selected':''}>${n}</option>`).join('');
 function a4File(s){const c=S.cfg,cu=cust(s.customerId)||{},m=x=>money(x);
   const pay=(s.pays||[]).map(p=>`${PAY[p.m].n}: ${m(p.amt)}`).join(' · ')||'—';
@@ -1257,7 +1283,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th{background:#eee;tex
 <table><thead><tr><th style="width:90px">Código</th><th>Descripción</th><th class="r" style="width:50px">Cant.</th><th class="r" style="width:70px">P. unit.</th><th class="r" style="width:50px">Dto.</th><th class="r" style="width:80px">Total</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="ft"><div><b>Forma de pago:</b> ${esc(pay)}${s.change>0?'<br>Cambio: '+m(s.change):''}${s.balance>0?'<br><b>Saldo por cobrar: '+m(s.balance)+'</b>'+(s.due?' · vence '+esc(s.due):''):''}</div>
 <table class="tt"><tbody>${T.map(x=>`<tr><td>${x[0]}</td><td class="r">${x[1]}</td></tr>`).join('')}<tr class="g"><td>TOTAL</td><td class="r">${m(s.total)}</td></tr></tbody></table></div>
-${tk('footer')&&c.footer?`<div class="th">${esc(c.footer).replace(/\n/g,'<br>')}</div>`:''}${tk('legal')?`<div class="th lg2">${esc(legalTxt())}</div>`:''}</body></html>`}
+${ftxt(s)?`<div class="th">${esc(ftxt(s)).replace(/\n/g,'<br>')}</div>`:''}${tk('legal')?`<div class="th lg2">${esc(legalTxt())}</div>`:''}</body></html>`}
 function ticketFile(s,fmt){fmt=fmt||S.cfg.paper||'pos58';if(fmt==='a4')return a4File(s);const P=prn(fmt),a4=false,w=P.iw+'mm',fs=P.fs+'px',feed=P.feedMm;
   const page=`@page{size:${P.paper}mm auto;margin:0}`;
   return `<!doctype html><html lang="es"><meta charset="utf-8"><title>${esc(s.doc)} ${esc(s.num)}</title><style>${page}body{font-family:'Courier New',monospace;font-size:${fs};width:${w};margin:0 auto;padding:2mm 0;color:#000${P.bold?';font-weight:700;-webkit-text-stroke:.25px #000':''}}h4{margin:0;text-align:center;font-size:${a4?'20px':'14px'}}.c{text-align:center}hr{border:0;border-top:1px dashed #000}table{width:100%;border-collapse:collapse}td,th{padding:${a4?'4px':'1px'} 0;text-align:left;vertical-align:top}.r{text-align:right}.noprint{margin:8px 0;padding:8px 14px}@media print{.noprint{display:none}}</style><body><button class="noprint" onclick="print()">Imprimir</button>${a4?`<div class="c"><img src="${LOGO}" width="80" height="80" style="border-radius:12px"></div>`:''}${receiptHTML(s)}${feed?`<div style="height:${feed}mm"></div><div class="c" style="font-size:14px;line-height:1;font-weight:700">.</div><div style="height:2mm"></div>`:''}</body></html>`}
@@ -1290,7 +1316,7 @@ function ticketCanvas(s){
     y+=44;T('TOTAL',L,'700 22px '+F,'#111');T(money(s.total),R,'800 36px '+F,ACC,'right');y+=6;
     if(tk('payments')){for(const p of s.pays)row((PAYE[p.m]||'')+' '+PAY[p.m].n,money(p.amt));if(s.change>0)row('Cambio',money(s.change))}
     if(s.balance>0){y+=34;if(!dry)rr(L-8,y-16,IW+16,64,12,'#FDECEC');y+=14;T('Saldo por cobrar',L,'700 17px '+F,'#B42318');T(money(s.balance),R,'800 22px '+F,'#B42318','right');if(s.due){y+=24;T('Vence: '+s.due,L,'14px '+F,'#B42318')}y+=8}
-    y+=30;if(tk('footer')&&c.footer&&!s.proforma){String(c.footer).split(/\n/).forEach(t=>{y+=26;T(t.trim(),W/2,'600 18px '+F,ACC,'center')})}
+    y+=30;if(ftxt(s)&&!s.proforma){String(ftxt(s)).split(/\n/).forEach(t=>{y+=26;T(t.trim(),W/2,'600 18px '+F,ACC,'center')})}
     if(s.proforma||tk('legal')){wrap(s.proforma?PF_LEGAL:legalTxt(),IW,'12px '+F).forEach(t=>{y+=18;T(t,W/2,'12px '+F,'#aaa','center')})}
     return y+44};
   let H=0;cv.width=W*2;cv.height=10;ctx.scale(2,2);H=run(true);cv.height=H*2;ctx.scale(2,2);
@@ -1893,7 +1919,7 @@ document.addEventListener('change',async e=>{if(e.target.id!=='ab_f')return;cons
   p.textContent='Preparando foto…';CR.photo=await imgShrink(f);p.textContent=CR.photo?'Foto lista ✓':'No se pudo leer la foto.'});
 function crText(cid){
   const c=cust(cid),L=crSales(cid),nm=c.name.split(' ')[0].toLowerCase().replace(/^./,x=>x.toUpperCase()),f=t=>new Date(t).toLocaleDateString('es-EC',{timeZone:TZ});
-  const T=[`Hola ${nm}, le saluda *${S.cfg.name}* 👋`,'',`Le recordamos que tiene un saldo pendiente de *${money(debt(cid))}*:`];
+  const T=[`${greet()}${nm?', '+nm:''}. Le saluda *${S.cfg.name}* 👋`,'',`Le recordamos que tiene un saldo pendiente de *${money(debt(cid))}*:`];
   for(const s of L)T.push(`• ${s.num} (${f(s.ts)}): ${money(s.balance)}${s.due?' · vence '+s.due:''}${crOver(s)?' ⚠️ vencido':''}`);
   T.push('','Puede pagar en efectivo o por transferencia. ¡Gracias! 🙏');return T.join('\n')}
 function crSend(cid){
